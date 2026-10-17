@@ -1,944 +1,603 @@
-<!DOCTYPE html>
-<html lang="zh-Hans">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="收单 Open API 商户接口文档：Hosted Checkout Session 创建/查询与收单 Webhook 对接说明。" />
-  <title>收单 Open API 商户接口文档</title>
-  <style>
-    :root {
-      --bg: #f4f7fb;
-      --card: #ffffff;
-      --text: #152033;
-      --muted: #5a6b80;
-      --border: #dfe6ef;
-      --accent: #0b5fff;
-      --accent-soft: #e8f0ff;
-      --ok: #0f766e;
-      --warn-bg: #fff8eb;
-      --warn-bd: #f0c36a;
-      --code-bg: #eef2f7;
-      --pre-bg: #0f172a;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.65;
-      font-size: 15px;
-    }
-    .layout { display: flex; max-width: 1160px; margin: 0 auto; min-height: 100vh; }
-    nav.doc-nav {
-      width: 250px;
-      flex-shrink: 0;
-      padding: 1.4rem 0.9rem 2rem 1.3rem;
-      position: sticky;
-      top: 0;
-      align-self: flex-start;
-      max-height: 100vh;
-      overflow-y: auto;
-      border-right: 1px solid var(--border);
-      background: linear-gradient(180deg, #fff 0%, var(--bg) 100%);
-    }
-    nav.doc-nav .brand {
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--text);
-      padding: 0.2rem 0.5rem 0.8rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 0.6rem;
-    }
-    nav.doc-nav .brand span { display: block; font-weight: 500; color: var(--muted); font-size: 12px; margin-top: 0.15rem; }
-    nav.doc-nav a {
-      display: block;
-      padding: 0.32rem 0.5rem;
-      color: var(--muted);
-      text-decoration: none;
-      border-radius: 6px;
-      font-size: 13px;
-    }
-    nav.doc-nav a:hover { background: var(--accent-soft); color: var(--accent); }
-    nav.doc-nav .nav-title {
-      font-weight: 700;
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin: 0.9rem 0 0.35rem;
-      padding: 0 0.5rem;
-    }
-    main { flex: 1; padding: 2rem 2.4rem 4rem; max-width: 860px; }
-    h1 { font-size: 1.8rem; margin: 0 0 0.4rem; letter-spacing: -0.02em; }
-    .subtitle { color: var(--muted); margin: 0 0 1.4rem; }
-    .meta {
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 0.45rem 1rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1rem 1.1rem;
-      margin: 1rem 0 1.5rem;
-      font-size: 14px;
-    }
-    .meta dt { color: var(--muted); }
-    .meta dd { margin: 0; }
-    h2 {
-      font-size: 1.28rem;
-      margin: 2.6rem 0 0.9rem;
-      padding-bottom: 0.35rem;
-      border-bottom: 2px solid var(--accent);
-      scroll-margin-top: 1rem;
-    }
-    h3 { font-size: 1.05rem; margin: 1.5rem 0 0.7rem; scroll-margin-top: 1rem; }
-    p { margin: 0.7rem 0; }
-    ol, ul { margin: 0.5rem 0 1rem; padding-left: 1.3rem; }
-    li { margin: 0.25rem 0; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0;
-      font-size: 14px;
-      background: var(--card);
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-    }
-    th, td {
-      border: 1px solid var(--border);
-      padding: 0.6rem 0.8rem;
-      text-align: left;
-      vertical-align: top;
-    }
-    th { background: #f8fafc; font-weight: 600; }
-    code, pre { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 12.5px; }
-    code { background: var(--code-bg); padding: 0.12em 0.38em; border-radius: 4px; }
-    pre {
-      background: var(--pre-bg);
-      color: #e2e8f0;
-      padding: 1rem 1.1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      line-height: 1.5;
-      margin: 0.8rem 0 1.2rem;
-    }
-    pre code { background: none; padding: 0; color: inherit; }
-    .tip, .note {
-      border-radius: 8px;
-      padding: 0.95rem 1.05rem;
-      margin: 1rem 0;
-      font-size: 14px;
-    }
-    .tip { background: var(--warn-bg); border: 1px solid var(--warn-bd); }
-    .tip strong { color: #9a6700; }
-    .note { background: var(--accent-soft); border: 1px solid #c9dbff; }
-    .path {
-      display: inline-block;
-      background: #10243f;
-      color: #dbeafe;
-      padding: 0.35rem 0.7rem;
-      border-radius: 6px;
-      font-family: ui-monospace, Consolas, monospace;
-      font-size: 13px;
-      margin: 0.4rem 0 0.8rem;
-    }
-    .checklist { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem 0.8rem 1.8rem; }
-    .checklist li { margin: 0.4rem 0; }
-    footer {
-      margin-top: 3rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 13px;
-    }
-    @media (max-width: 900px) {
-      .layout { flex-direction: column; }
-      nav.doc-nav {
-        position: static;
-        max-height: none;
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-      }
-      main { padding: 1.4rem 1.1rem 3rem; }
-      .meta { grid-template-columns: 1fr; }
-    }
-    @media print {
-      nav.doc-nav { display: none; }
-      main { max-width: none; padding: 0; }
-      body { background: #fff; }
-      pre { white-space: pre-wrap; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="VCC 收单开放平台：商户 API、HMAC 签名、托管收银台、支付查询、退款、争议、余额与 Webhook 接入文档。">
+<title>VCC 收单开放平台 · 开发者文档</title>
+<style>
+:root{--ink:#152b46;--muted:#607085;--line:#dbe4ef;--blue:#245ce5;--ice:#eaf1fb;--paper:#fff;--canvas:#f5f8fc;--green:#18765b;--code:#112840;--header:72px;--sidebar:248px;color:var(--ink);background:var(--paper);font-family:"Segoe UI Variable Text","Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;font-synthesis:none}
+*{box-sizing:border-box}html{scroll-padding-top:96px;scroll-behavior:smooth}body{margin:0;min-width:320px;font-size:14px;line-height:1.8}a{color:var(--blue);text-underline-offset:3px}button,input{font:inherit}button{min-height:44px;cursor:pointer}a,button,input{touch-action:manipulation}:focus-visible{outline:3px solid var(--blue);outline-offset:4px}h2:focus:not(:focus-visible){outline:none}[hidden]{display:none!important}code,pre,.mono{font-family:Consolas,"Cascadia Code","Courier New",monospace}code{font-size:.9em;overflow-wrap:anywhere}p{margin:10px 0}ul,ol{padding-left:22px}li+li{margin-top:7px}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.skip{position:fixed;left:18px;top:-70px;z-index:110;padding:12px 18px;background:var(--blue);color:#fff;border-radius:5px}.skip:focus{top:12px}
+.header{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:20px;height:var(--header);padding:0 34px;border-bottom:1px solid var(--line);background:var(--paper)}.brand{display:flex;align-items:center;gap:13px;color:var(--ink);text-decoration:none}.mark{display:grid;place-items:center;width:43px;height:34px;border-radius:5px;background:var(--ink);color:#fff;font-size:13px;font-weight:800;letter-spacing:-.8px}.brand strong{font-size:17px;font-weight:750}.brand small{margin-left:12px;padding-left:12px;border-left:1px solid var(--line);color:var(--muted);font-size:12px}.header-actions{display:flex;align-items:center;gap:25px}.header-actions>a{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;font-size:12px;color:var(--ink)}.version{display:flex;align-items:center;gap:8px;color:var(--muted);font:11px Consolas,monospace}.version:before{content:"";width:6px;height:6px;background:var(--blue);border-radius:50%}.menu-toggle,.drawer-close{display:none}.layout{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr)}.sidebar{position:sticky;top:var(--header);align-self:start;height:calc(100vh - var(--header));overflow:auto;padding:26px 18px 30px;border-right:1px solid var(--line);background:var(--canvas)}.search-box{position:relative}.search-box input{width:100%;height:44px;padding:0 44px 0 12px;border:1px solid #bccbdd;border-radius:5px;background:#fff;color:var(--ink);font-size:12px}.search-box input::-webkit-search-cancel-button{display:none}.search-clear{position:absolute;top:3px;right:3px;min-height:38px;width:38px;border:0;border-radius:4px;background:none;color:var(--muted);font-size:20px}.search-clear:hover{background:var(--ice)}.search-help{margin:7px 0 20px 2px;color:var(--muted);font-size:11px}kbd{padding:1px 4px;border:1px solid var(--line);border-radius:3px;background:#fff;font:11px Consolas,monospace}.nav-label{margin:23px 11px 7px;color:var(--muted);font-size:10px;font-weight:750;letter-spacing:1.5px}.nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:8px 11px;border-left:2px solid transparent;border-radius:4px;color:#4d5e73;text-decoration:none;font-size:12px}.nav a:hover{color:var(--blue);background:var(--ice)}.nav a[aria-current="location"]{color:var(--blue);background:#e4ecfc;border-left-color:var(--blue);font-weight:700}.nav a small{font:9px Consolas,monospace;color:#68778a}.side-foot{margin-top:23px;padding:22px 11px 0;border-top:1px solid var(--line);color:var(--muted);font-size:10px}.side-foot strong{display:block;color:var(--ink);font-size:11px}.content{min-width:0;width:min(1380px,100%);margin:auto;padding:48px 50px 0}.eyebrow{margin:0 0 12px;color:var(--blue);font:700 10px/1.5 Consolas,"Microsoft YaHei",sans-serif;letter-spacing:1.8px}.hero{padding-bottom:35px;border-bottom:1px solid var(--line)}.hero-top{display:grid;grid-template-columns:1.12fr 1fr;gap:40px;align-items:end}.hero h1{margin:0;font-family:"Segoe UI Variable Display","Segoe UI","Microsoft YaHei",sans-serif;font-size:clamp(33px,3vw,49px);font-weight:740;line-height:1.28;letter-spacing:-1.7px}.hero h1 span{color:var(--blue)}.lede{max-width:540px;margin:18px 0 0;color:var(--muted);font-size:14px;line-height:1.95}.hero-actions{display:flex;align-items:center;gap:22px;margin-top:24px}.primary-link{display:inline-flex;align-items:center;gap:24px;min-height:44px;padding:10px 16px;border-radius:5px;background:var(--blue);color:#fff;text-decoration:none;font-size:12px;font-weight:700}.primary-link:hover{background:#184acc}.quiet-link{font-size:12px}.api-address{padding:23px 25px;border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:6px;background:var(--canvas)}.api-address .label{display:block;margin-bottom:9px;color:var(--muted);font:10px Consolas,monospace;letter-spacing:1.5px}.api-address>code{font-size:clamp(11px,1.05vw,15px);font-weight:700}.api-address p{margin:15px 0 0;color:var(--muted);font-size:12px}.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:22px}.tag{padding:3px 8px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--muted);font-size:10px;font-weight:600}.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:32px;border:1px solid #cbd9ec;border-radius:6px;background:var(--ice);overflow:hidden}.flow-step{position:relative;padding:18px 16px 17px 44px}.flow-step+.flow-step{border-left:1px solid #cbd9ec}.flow-num{position:absolute;top:23px;left:17px;color:var(--blue);font:700 11px Consolas,monospace}.flow-step strong{font-size:12px}.flow-step code{display:block;margin-top:6px;color:var(--muted);font-size:10px}.flow-step p{margin:4px 0 0;color:var(--muted);font-size:11px}.doc-section{padding:43px 0;border-bottom:1px solid var(--line)}.section-heading{margin-bottom:22px}.section-heading .eyebrow{margin-bottom:8px}.doc-section h2{margin:0;font-size:27px;font-weight:730;line-height:1.4;letter-spacing:-.6px}.section-intro{max-width:850px;margin:12px 0 0;color:var(--muted);font-size:14px}.doc-section h3{margin:27px 0 10px;font-size:17px;font-weight:700}.doc-section h4{margin:20px 0 9px;font-size:13px}.doc-section>p,.doc-section>ul,.doc-section>ol{max-width:980px}.muted{color:var(--muted)}.callout{margin:20px 0;padding:15px 18px;border-left:3px solid var(--blue);border-radius:0 5px 5px 0;background:var(--ice);font-size:12px}.callout strong{display:block;margin-bottom:4px;color:var(--ink)}.callout.warn{background:#fcf6e9;border-color:#ad7a27;color:#705224}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.card{padding:19px 20px;border:1px solid var(--line);border-radius:6px}.card h3{margin:0 0 7px;font-size:13px}.card p{margin:0;color:var(--muted);font-size:12px}.card .detail{display:block;margin-top:12px;color:var(--blue);font-size:10px}.example-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;align-items:start}.example-grid>*{min-width:0}.endpoint{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:17px 0 10px;padding:12px 15px;border:1px solid var(--line);border-radius:5px;background:var(--canvas)}.endpoint>code{font-size:11px}.method{display:inline-flex;justify-content:center;min-width:43px;padding:3px 6px;border-radius:3px;font:700 10px/1.4 Consolas,monospace}.get{color:#1c55bb;background:#e6effd}.post{color:#14634c;background:#e1f1e8}.patch{color:#805315;background:#f7ecd1}.scope{margin-left:auto;color:var(--muted);font:10px Consolas,monospace}.table-wrap{max-width:100%;overflow-x:auto;margin:15px 0;border:1px solid var(--line);border-radius:5px}table{width:100%;border-collapse:collapse;text-align:left;font-size:12px}th{padding:10px 13px;background:var(--canvas);color:#4d5e73;white-space:nowrap;font-size:11px;font-weight:700}td{padding:11px 13px;border-top:1px solid var(--line);vertical-align:top}td code{font-size:11px}td .method{margin-right:5px}.required{color:#b14238;font-size:10px}.optional{color:var(--muted);font-size:10px}.code-panel{margin:15px 0;border:1px solid var(--code);border-radius:6px;background:var(--code);color:#e3ecfa;overflow:hidden}.code-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:42px;padding:5px 15px;border-bottom:1px solid #31506c;background:#19344e}.code-bar>span{color:#bfd0e4;font:10px Consolas,"Microsoft YaHei",sans-serif;letter-spacing:.3px}.copy-btn{min-height:30px;min-width:47px;padding:3px 9px;border:1px solid #66809a;border-radius:4px;background:none;color:#e3ecfa;font-size:10px}.copy-btn:hover{background:#2b4966}pre{max-width:100%;overflow:auto;margin:0;padding:18px;font-size:11px;line-height:1.8;white-space:pre;tab-size:2}pre code{font-size:inherit;overflow-wrap:normal}.status-list{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0}.status-list code{padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:var(--canvas);font-size:10px}.status-list .success{background:#e7f3eb;color:#14634c;border-color:#b4d6bf}.checklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 25px;padding:0;list-style:none}.checklist li{position:relative;margin:0;padding:12px 0 12px 25px;border-bottom:1px solid var(--line);font-size:12px}.checklist li:before{content:"";position:absolute;left:0;top:18px;width:11px;height:11px;border:1.5px solid #6d94e8;border-radius:2px}.no-results{margin:30px 0;padding:32px;border:1px dashed #b4c6de;border-radius:6px;background:var(--canvas);text-align:center}.no-results h2{font-size:20px}.text-button{border:0;background:none;color:var(--blue);text-decoration:underline;text-underline-offset:3px}.footer{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:26px 0 35px;color:var(--muted);font-size:10px}.copy-status{position:fixed;right:24px;bottom:24px;z-index:100;max-width:calc(100vw - 32px);margin:0;padding:10px 16px;border-radius:5px;background:var(--ink);color:#fff;font-size:12px;box-shadow:0 5px 20px #152b4620}.copy-status:empty{display:none}.backdrop{display:none}
+@media(min-width:1600px){.content{padding-left:65px;padding-right:65px}}
+@media(max-width:1180px){:root{--sidebar:225px}.header{padding:0 25px}.content{padding:38px 30px 0}.hero-top{gap:25px}.hero h1{font-size:35px}.flow-step{padding-left:36px;padding-right:10px}.flow-num{left:11px}.scope{margin-left:0}.cards{grid-template-columns:1fr}.card{padding:16px 19px}}
+@media(max-width:880px){:root{--header:64px}.header{padding:0 18px;gap:14px}.brand strong{font-size:15px}.brand small,.version{display:none}.header-actions{gap:15px}.header-actions>a{font-size:11px}.layout{display:block}.content{padding:30px 22px 0}.sidebar{position:relative;top:auto;height:auto;padding:22px;border-bottom:1px solid var(--line);border-right:0}.js .sidebar{position:fixed;inset:var(--header) auto 0 0;z-index:80;width:min(320px,88vw);height:calc(100dvh - var(--header));visibility:hidden;transform:translateX(-105%);transition:transform .18s ease}.js .sidebar.open{visibility:visible;transform:translateX(0)}.js .menu-toggle{display:inline-flex;align-items:center;justify-content:center;width:44px;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--ice);color:var(--ink);font-size:12px}.drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-size:13px;font-weight:700}.drawer-head:before{content:"文档目录"}.js .drawer-close{display:inline-flex;align-items:center;justify-content:center;width:44px;border:1px solid var(--line);border-radius:4px;background:none;color:var(--ink);font-size:20px}.js .backdrop.open{display:block;position:fixed;inset:var(--header) 0 0;z-index:70;background:#152b4666}.menu-open{overflow:hidden}.hero-top{grid-template-columns:1fr;gap:26px}.hero h1{font-size:37px}.api-address{padding:18px 20px}.api-address>code{font-size:15px}.flow{margin-top:25px}.example-grid{grid-template-columns:1fr}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.checklist{grid-template-columns:1fr}.doc-section{padding:34px 0}.doc-section h2{font-size:25px}html{scroll-padding-top:84px}}
+@media(min-width:881px){.drawer-head{display:none}}
+@media(max-width:560px){.header-actions>a{display:none}.brand{gap:9px}.mark{width:38px;height:31px}.brand strong{font-size:14px}.content{padding:27px 17px 0}.hero h1{font-size:32px;letter-spacing:-1px}.lede{font-size:13px}.api-address>code{font-size:12px}.flow{grid-template-columns:1fr}.flow-step{padding:14px 16px 14px 46px}.flow-step+.flow-step{border-left:0;border-top:1px solid #cbd9ec}.flow-num{left:19px;top:18px}.flow-step code{margin-top:3px}.cards{grid-template-columns:1fr}.doc-section h2{font-size:23px}.table-wrap table{min-width:590px}th,td{padding:10px 12px}.endpoint{padding:11px;gap:8px}.endpoint>code{flex-basis:calc(100% - 65px);font-size:10px}.endpoint .scope{margin-left:51px}pre{padding:16px 14px;font-size:10.5px}.section-intro{font-size:13px}.callout{padding:13px 14px}.footer{display:block}.footer a{display:inline-block;margin-top:10px}.copy-status{right:16px;bottom:16px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+@media print{html{scroll-behavior:auto}body{font-size:10pt}.header,.sidebar,.backdrop,.skip,.hero-actions,.copy-btn,.copy-status,.no-results{display:none!important}.layout{display:block}.content{width:100%;padding:0}.hero h1{font-size:26pt}.hero{padding-bottom:18px}.hero-top{display:block}.api-address{margin-top:18px}.flow{margin-top:18px}.doc-section{padding:22px 0}.doc-section[hidden],.hero[hidden]{display:block!important}.example-grid,.checklist{display:block}.code-panel,.card,.callout{break-inside:avoid}.code-panel{color:var(--ink);background:#f4f6f8;border-color:#cbd4df}.code-bar{background:#eef1f5;border-color:#cbd4df}.code-bar>span{color:#415775}pre{white-space:pre-wrap;font-size:8pt}pre code{overflow-wrap:anywhere}.table-wrap{overflow:visible}.table-wrap table{min-width:0!important;font-size:8pt}td code{font-size:8pt}h2,h3{break-after:avoid}@page{size:A4;margin:14mm}}
+</style>
 </head>
 <body>
-  <div class="layout">
-    <nav class="doc-nav" aria-label="目录">
-      <div class="brand">收单 Open API<span>商户对接 · 一期</span></div>
-      <div class="nav-title">目录</div>
-      <a href="#overview">概述</a>
-      <a href="#prepare">接入前准备</a>
-      <a href="#auth">鉴权与签名</a>
-      <a href="#response">统一响应</a>
-      <a href="#apis">接口一览</a>
-      <a href="#create">创建 Checkout Session</a>
-      <a href="#embed">打开托管收银台（SDK）</a>
-      <a href="#get">查询 Checkout Session</a>
-      <a href="#list">列出 Checkout Session</a>
-      <a href="#patch">更新 Checkout Session</a>
-      <a href="#payment-intent-list">列出 Payment Intent</a>
-      <a href="#payment-intent-get">查询 Payment Intent</a>
-      <a href="#webhook">收单 Webhook</a>
-      <a href="#errors">错误码</a>
-      <a href="#limits">限流与约束</a>
-      <a href="#examples">签名示例</a>
-      <a href="#checklist">联调清单</a>
-      <a href="#changelog">变更记录</a>
-    </nav>
+<a class="skip" href="#main">跳到正文</a>
+<header class="header">
+  <a class="brand" href="#hero" aria-label="VCC 收单开放平台首页"><span class="mark">VCC</span><span><strong>收单开放平台</strong><small>开发者文档</small></span></a>
+  <div class="header-actions"><span class="version">OPEN API v1</span><a href="https://pay.saferoute.global" target="_blank" rel="noopener noreferrer">商户平台 ↗</a><button id="menuToggle" class="menu-toggle" type="button" aria-label="打开文档目录" aria-controls="sidebar" aria-expanded="false">目录</button></div>
+</header>
+<div class="layout">
+<aside class="sidebar" id="sidebar" aria-label="文档目录">
+  <div class="drawer-head"><button class="drawer-close" id="drawerClose" type="button" aria-label="关闭目录">×</button></div>
+  <div class="search-box"><label class="sr-only" for="search">搜索接口、字段或错误码</label><input id="search" type="search" placeholder="搜索接口、字段、错误码" autocomplete="off" aria-describedby="searchStatus"><button class="search-clear" id="searchClear" type="button" aria-label="清空搜索" hidden>×</button></div>
+  <p class="search-help">按 <kbd>/</kbd> 搜索文档</p><p id="searchStatus" class="sr-only" role="status" aria-live="polite"></p>
+  <nav class="nav" aria-label="开发者文档章节">
+    <div class="nav-block"><p class="nav-label">开始接入</p><a href="#overview"><span>平台概览</span></a><a href="#quickstart"><span>快速开始</span><small>START</small></a><a href="#auth"><span>鉴权与签名</span><small>HMAC</small></a><a href="#common"><span>通用约定与接口目录</span></a></div>
+    <div class="nav-block"><p class="nav-label">支付与资金</p><a href="#payments"><span>支付 Payment</span></a><a href="#hosted"><span>托管收银台</span></a><a href="#refunds"><span>退款 Refund</span></a><a href="#disputes"><span>争议 Dispute</span></a><a href="#balance"><span>余额 Balance</span></a><a href="#payouts"><span>提现 Payout</span></a></div>
+    <div class="nav-block"><p class="nav-label">兼容接口</p><a href="#checkout"><span>Checkout Session</span></a><a href="#intents"><span>Payment Intent</span></a></div>
+    <div class="nav-block"><p class="nav-label">消息与排错</p><a href="#webhooks"><span>Webhook 通知</span></a><a href="#errors"><span>错误处理</span></a><a href="#checklist"><span>接入检查清单</span></a></div>
+  </nav>
+  <div class="side-foot"><strong>服务端签名 · 托管收银台</strong>协议 v1 / Webhook Schema v1<br>文档更新 2026-10-17</div>
+</aside>
+<div id="backdrop" class="backdrop" aria-hidden="true"></div>
+<main class="content" id="main" tabindex="-1">
+<div class="hero" id="hero">
+  <div class="hero-top"><div><p class="eyebrow">VCC ACQUIRING / DEVELOPER PLATFORM</p><h1>从创建支付，<br><span>到确认收款。</span></h1><p class="lede">为你的业务接入收单。用一套服务端 API 连接订单、平台收银台与支付结果，让每一步都有可核对的状态。</p><div class="hero-actions"><a class="primary-link" href="#quickstart">开始接入 <span aria-hidden="true">→</span></a><a class="quiet-link" href="#common">查看接口目录</a></div></div><div class="api-address"><span class="label">API BASE URL</span><code>https://api.saferoute.global</code><p>JSON / HTTPS / HMAC-SHA256<br>环境与 MID 由凭据绑定，密钥仅用于服务端。</p><div class="tags"><span class="tag">OPEN API v1</span><span class="tag">USD · 整数美分</span><span class="tag">Webhook v1</span></div></div></div>
+  <div class="flow" aria-label="支付接入流程"><div class="flow-step"><span class="flow-num">01</span><strong>创建支付</strong><code>POST /payments</code><p>保存订单、幂等键与 paymentId</p></div><div class="flow-step"><span class="flow-num">02</span><strong>打开托管收银台</strong><code>checkout.saferoute.global</code><p>将订单地址交给对应买家</p></div><div class="flow-step"><span class="flow-num">03</span><strong>查询与通知确认</strong><code>GET Payment → CAPTURED</code><p>核对订单、金额、币种后履约</p></div></div>
+</div>
+<noscript><p class="callout">全部接口内容可直接阅读。搜索、复制和移动目录交互需要 JavaScript；也可使用浏览器“查找”。</p></noscript>
+<div class="no-results" id="noResults" hidden><h2>没有找到相关章节</h2><p>试试 payment、签名、退款、nonce 或错误码。</p><button class="text-button" id="emptyClear" type="button">清空搜索，显示全部文档</button></div>
 
-    <main>
-      <h1 id="overview">收单 Open API 接口文档（一期）</h1>
-      <p class="subtitle">面向收单商户。能力为 Payment Processing 中转：Checkout Session（创建 / 查询 / 列表 / 更新）与 Payment Intent（查询 / 列表）；支付完成后通过独立收单 Webhook 通知商户。</p>
+<section class="doc-section" id="overview" data-search>
+<div class="section-heading"><p class="eyebrow">GET STARTED</p><h2 tabindex="-1">接入前，先确认这几件事</h2><p class="section-intro">商户服务端创建与查询支付，买家在平台收银台完成操作；凭据、金额与最终支付结果都由服务端管理。</p></div>
+<div class="cards"><div class="card"><h3>凭据与环境</h3><p>申请 ACQUIRING 类型的 AccessKeyId、SecretKey 与 MerchantCode，确认绑定的 MID、TEST / LIVE 环境及操作 scope。</p><span class="detail">一组凭据 · 一个 MID · 一个环境</span></div><div class="card"><h3>订单与金额</h3><p>所有金额使用 USD 整数美分。保存商户订单号、支付资源 ID 与每个业务动作的幂等键。</p><span class="detail">USD 10.00 → 1000</span></div><div class="card"><h3>通知与确认</h3><p>准备 HTTPS Webhook 地址与独立通知密钥，验签、去重并查询原支付，再执行履约。</p><span class="detail">Payment.status = CAPTURED</span></div></div>
+<div class="callout warn"><strong>当前受理范围</strong>新版 Payment 创建仅支持已开通的 <b>TEST + AUTOMATIC</b> 钱包流程，且需有效策略与真实外部钱包资格；VISA / MASTERCARD 在该创建路径当前拒绝。Capture、Void 与公开提现写入当前不可用；退款、争议写入仅有 TEST 能力，LIVE 未开放。请先与平台确认本商户可用能力。</div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="平台地址"><table><thead><tr><th>用途</th><th>地址 / 约定</th></tr></thead><tbody><tr><td>Open API</td><td><code>https://api.saferoute.global</code> · 前缀 <code>/open/v1/acquiring</code></td></tr><tr><td>商户门户</td><td><a href="https://pay.saferoute.global" target="_blank" rel="noopener noreferrer">pay.saferoute.global ↗</a></td></tr><tr><td>买家收银台</td><td><code>https://checkout.saferoute.global</code> · 使用订单对应地址</td></tr><tr><td>TEST / LIVE</td><td>由凭据绑定确定；更换环境使用对应凭据。域名相同不代表权限或受理能力相同。</td></tr></tbody></table></div>
+<p class="muted">本文资源 ID、订单和通知均为合成数据，用于说明格式；不代表已创建的可用订单。</p>
+</section>
 
-      <dl class="meta">
-        <dt>文档版本</dt><dd>2026-08-11</dd>
-        <dt>服务前缀</dt><dd><code>/open/v1/acquiring/**</code></dd>
-        <dt>凭证类型</dt><dd>必须使用 <code>credential_type = ACQUIRING</code> 的 AccessKey</dd>
-        <dt>Base URL</dt><dd>由交付环境提供，形如 <code>https://{host}</code>（下文路径相对该 Host）</dd>
-        <dt>责任边界</dt><dd>一期为 API / Webhook <strong>技术中转与商户隔离</strong>；收单主体、清算、拒付、结算以合同及渠道协议为准</dd>
-      </dl>
+<section class="doc-section" id="quickstart" data-search>
+<div class="section-heading"><p class="eyebrow">INTEGRATION FLOW</p><h2 tabindex="-1">完成第一笔接入</h2><p class="section-intro">先确认 TEST 凭据、MID、支付方式、有效策略和真实钱包资格，再连接商户服务端与买家页面。</p></div>
+<ol><li><strong>服务端创建支付。</strong>保存订单与 <code>Idempotency-Key</code>，签名调用 <code>POST /payments</code>，保存返回的 <code>paymentId</code>。</li><li><strong>买家打开平台收银台。</strong>以收银台 origin 解析返回的相对 <code>checkoutUrl</code>，仅交给本订单买家；API 凭据留在服务端。</li><li><strong>服务端确认结果。</strong>接收已验签通知，或签名查询 <code>GET /payments/{paymentId}</code>；核对原订单、金额、币种，只有 <code>CAPTURED</code> 才确认收款并履约。</li></ol>
+<div class="callout"><strong>浏览器返回只用于体验</strong>页面跳转、关窗或前端完成提示均不能确认收款。处理中、超时、未知结果应继续确认原支付，避免创建第二笔。</div>
+<h3>完整服务端示例</h3><p>保存为 <code>create-payment.mjs</code>，使用 Node.js 18+，无需安装依赖。通过环境变量设置凭据、持久化的原幂等键和订单号；正文只序列化一次。运行示例会发送创建请求，请仅用于平台已开通且具备真实钱包资格的 TEST 商户。</p>
+<div class="code-panel"><div class="code-bar"><span>Node.js · create-payment.mjs</span></div><pre tabindex="0" aria-label="Node.js 完整签名请求"><code id="signed-example" data-copy>import crypto from "node:crypto";
 
-      <div class="tip">
-        <strong>重要：</strong>本接口仅接受 <code>ACQUIRING</code> 凭证。使用其他类型凭证调用本路径返回 <code>40314</code>。
-      </div>
-
-      <h2 id="prepare">1. 接入前准备</h2>
-      <ol>
-        <li>联系运营开通商户 <code>acquiring_enabled</code>（未开通时创建 / PATCH Session 返回 <code>40315</code>）。</li>
-        <li>获取 <strong>ACQUIRING</strong> 类型 Open API 凭证：<code>AccessKeyId</code> + <code>SecretKey</code> + <code>MerchantCode</code>（由运营创建）。</li>
-        <li>向运营配置收单 Webhook：<strong>HTTPS 回调 URL</strong> + 订阅事件（建议订阅 <code>checkout_session.completed</code>、<code>payment_intent.succeeded</code>、<code>payment_intent.failed</code>），妥善保存 <strong>Webhook Secret</strong>（仅创建/轮换时展示一次）。</li>
-        <li>实现：请求签名（§2）、幂等 Key（创建 Session）、Webhook 验签（§11）、<strong>前端用 <code>@slashfi/checkout-js</code> 嵌入托管收银台</strong>（§5.6，不可直接浏览器打开 <code>url</code>）。</li>
-      </ol>
-
-      <h2 id="auth">2. 鉴权与请求签名（商户 → 平台）</h2>
-      <p>除健康检查外，所有请求须带签名头。</p>
-
-      <h3 id="headers">2.1 请求头</h3>
-      <table>
-        <thead><tr><th>HTTP 头</th><th>必填</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>X-Access-Key-Id</code></td><td>是</td><td>ACQUIRING AccessKey ID</td></tr>
-          <tr><td><code>X-Merchant-Code</code></td><td>是</td><td>商户编码，须与 Key 所属商户一致</td></tr>
-          <tr><td><code>X-Vcc-Timestamp</code></td><td>是</td><td>Unix 时间戳，单位<strong>秒</strong>（UTC）</td></tr>
-          <tr><td><code>X-Vcc-Signature</code></td><td>是</td><td>HMAC-SHA256，<strong>小写十六进制</strong></td></tr>
-          <tr><td><code>Idempotency-Key</code></td><td>写操作必填</td><td><code>POST</code> 创建 Session <strong>必填</strong>；建议 UUID</td></tr>
-          <tr><td><code>Content-Type</code></td><td>有 body 时</td><td><code>application/json</code></td></tr>
-          <tr><td><code>X-Trace-Id</code></td><td>否</td><td>调用方追踪 ID</td></tr>
-        </tbody>
-      </table>
-
-      <h3 id="canonical">2.2 Canonical Request</h3>
-      <p>用 <code>\n</code>（ASCII 0x0A）连接 4 行，再做 HMAC：</p>
-      <ol>
-        <li>HTTP 方法（大写），如 <code>POST</code></li>
-        <li>Servlet 路径，如 <code>/open/v1/acquiring/checkout-sessions</code>（不含域名与 query）</li>
-        <li>规范化查询串：无参数时为<strong>空字符串</strong></li>
-        <li>请求体原始字节的 SHA-256（小写 hex）；无 body 时对<strong>空字节</strong>做哈希</li>
-      </ol>
-      <pre><code>Signature = hex_lower( HMAC_SHA256( UTF8(SecretKey), UTF8(CanonicalRequest) ) )</code></pre>
-
-      <h3>2.3 凭证范围</h3>
-      <table>
-        <thead><tr><th>项</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td>允许的凭证</td><td><code>credential_type = ACQUIRING</code></td></tr>
-          <tr><td>可调用路径</td><td><code>/open/v1/acquiring/**</code>，以及允许的 <code>GET /open/v1/health</code></td></tr>
-          <tr><td>错误</td><td>凭证类型不匹配 → HTTP <strong>403</strong>，业务码 <code>40314</code>（<code>OPEN_API_CREDENTIAL_SCOPE_DENIED</code>）</td></tr>
-        </tbody>
-      </table>
-
-      <h2 id="response">3. 统一响应</h2>
-      <h3>成功（HTTP 200）</h3>
-      <pre><code>{
-  "code": "0",
-  "message": "OK",
-  "data": { },
-  "traceId": "..."
-}</code></pre>
-      <p>业务字段均在 <code>data</code> 内。</p>
-
-      <h3>失败（HTTP 4xx / 5xx）</h3>
-      <pre><code>{
-  "code": "40315",
-  "message": "商户未开通收单能力",
-  "data": null,
-  "traceId": "..."
-}</code></pre>
-      <p>请将 <code>traceId</code> 一并提供给支持排查。</p>
-
-      <h2 id="apis">4. 接口一览</h2>
-      <table>
-        <thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>POST</code></td><td><code>/open/v1/acquiring/checkout-sessions</code></td><td>创建 Checkout Session</td></tr>
-          <tr><td><code>GET</code></td><td><code>/open/v1/acquiring/checkout-sessions</code></td><td>列出本商户 Session（本地快照，非实时）</td></tr>
-          <tr><td><code>GET</code></td><td><code>/open/v1/acquiring/checkout-sessions/{id}</code></td><td>查询 Session（非终态会回源渠道刷新）</td></tr>
-          <tr><td><code>PATCH</code></td><td><code>/open/v1/acquiring/checkout-sessions/{id}</code></td><td>更新 open Session 的 amount / expiresAt</td></tr>
-          <tr><td><code>GET</code></td><td><code>/open/v1/acquiring/payment-intents</code></td><td>列出本商户已映射 Payment Intent</td></tr>
-          <tr><td><code>GET</code></td><td><code>/open/v1/acquiring/payment-intents/{id}</code></td><td>查询 Payment Intent（归属校验 + 非终态回源）</td></tr>
-          <tr><td><code>GET</code></td><td><code>/open/v1/health</code></td><td>健康检查（可不签名）</td></tr>
-        </tbody>
-      </table>
-      <div class="note">不含：退款写接口、对账下载、收银台自托管、Portal 自助配置。Session/Intent 响应可含 <code>paymentIntentId</code>（未知时为 <code>null</code>，属合法中间态）。</div>
-
-      <h2 id="create">5. 创建 Checkout Session</h2>
-      <div class="path">POST /open/v1/acquiring/checkout-sessions</div>
-
-      <h3>5.1 额外请求头</h3>
-      <table>
-        <thead><tr><th>头</th><th>必填</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>Idempotency-Key</code></td><td><strong>是</strong></td><td>商户侧幂等键。相同 Key + 相同 body → 返回首次结果；相同 Key + 不同 body → <code>40904</code></td></tr>
-        </tbody>
-      </table>
-      <p>平台会改写发往渠道的幂等键，<strong>不会</strong>把商户原始 Key 透传给渠道。</p>
-
-      <h3>5.2 请求体</h3>
-      <table>
-        <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>amount</code></td><td>integer</td><td>是</td><td>金额，单位<strong>美分</strong>；范围 <code>1</code> … <code>99999999</code></td></tr>
-          <tr><td><code>currency</code></td><td>string</td><td>是</td><td>仅支持 <code>usd</code>（大小写不敏感）</td></tr>
-          <tr><td><code>clientOrderId</code></td><td>string</td><td>否</td><td>商户订单号，最长 64</td></tr>
-          <tr><td><code>customMetadata</code></td><td>object</td><td>否</td><td>自定义元数据；值仅允许标量；总大小（含平台注入）≤ <strong>2KB</strong>；键名<strong>禁止</strong>使用平台保留前缀（大小写不敏感）</td></tr>
-          <tr><td><code>config</code></td><td>object</td><td>否</td><td>透传给渠道的收银台配置对象</td></tr>
-        </tbody>
-      </table>
-      <p>未知顶层字段 → <code>40001</code>。平台会在 metadata 中注入只读的商户标识、商户编码等保留字段（若有 <code>clientOrderId</code> 再注入订单映射字段）；商户勿写入或依赖覆写这些保留键。</p>
-
-      <h3>5.3 请求示例</h3>
-      <pre><code>POST /open/v1/acquiring/checkout-sessions HTTP/1.1
-Host: {host}
-Content-Type: application/json
-X-Access-Key-Id: ak_acq_xxx
-X-Merchant-Code: M2026...
-X-Vcc-Timestamp: 1723276800
-X-Vcc-Signature: ...
-Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
-
-{
-  "amount": 1999,
-  "currency": "usd",
-  "clientOrderId": "ORD-20260810-001",
-  "customMetadata": {
-    "sku": "PLAN_PRO",
-    "uid": "u_10086"
-  }
-}</code></pre>
-
-      <h3>5.4 成功响应 data</h3>
-      <table>
-        <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>id</code></td><td>string</td><td>Checkout Session ID（后续查询使用）</td></tr>
-          <tr><td><code>url</code></td><td>string</td><td>托管收银台 URL（<strong>须用 SDK 嵌入</strong>，见 <a href="#embed">§5.6</a>；勿直接在浏览器地址栏打开）</td></tr>
-          <tr><td><code>status</code></td><td>string</td><td>如 <code>open</code> / <code>complete</code> / <code>expired</code></td></tr>
-          <tr><td><code>amount</code></td><td>integer</td><td>美分</td></tr>
-          <tr><td><code>currency</code></td><td>string</td><td>如 <code>usd</code></td></tr>
-          <tr><td><code>clientOrderId</code></td><td>string|null</td><td>商户订单号</td></tr>
-          <tr><td><code>merchantCode</code></td><td>string</td><td>商户编码</td></tr>
-          <tr><td><code>createdAt</code></td><td>string</td><td>ISO-8601 创建时间</td></tr>
-          <tr><td><code>expiresAt</code></td><td>string|null</td><td>过期时间 ISO-8601</td></tr>
-          <tr><td><code>paymentIntentId</code></td><td>string|null</td><td>关联 Payment Intent；创建当下常为 <code>null</code></td></tr>
-        </tbody>
-      </table>
-      <pre><code>{
-  "code": "0",
-  "message": "OK",
-  "data": {
-    "id": "acq_checkout_xxx",
-    "url": "https://app.slash.com/checkout/acq_checkout_xxx",
-    "status": "open",
-    "amount": 1999,
-    "currency": "usd",
-    "clientOrderId": "ORD-20260810-001",
-    "merchantCode": "M2026...",
-    "createdAt": "2026-08-10T10:00:00.000Z",
-    "expiresAt": "2026-08-11T10:00:00.000Z",
-    "paymentIntentId": null
-  },
-  "traceId": "..."
-}</code></pre>
-
-      <h3>5.5 推荐业务流程</h3>
-      <ol>
-        <li>服务端 <code>POST</code> 创建 Session，落库 <code>id</code> + <code>clientOrderId</code>。</li>
-        <li>将 <code>url</code> 交给<strong>你们自己的前端页面</strong>，用 <code>@slashfi/checkout-js</code> <strong>嵌入</strong>（见 <a href="#embed">§5.6</a>）。</li>
-        <li>以 Webhook <code>completed</code> 为准更新订单；可用 <code>GET</code> 查询做补偿。</li>
-        <li>勿依赖用户关闭页面时机作为支付成功依据。</li>
-      </ol>
-
-      <h2 id="embed">5.6 打开托管收银台（必须 SDK 嵌入）</h2>
-      <div class="tip">
-        <strong>必读：</strong>渠道 Hosted Checkout 要求在商户页面内用官方 SDK 挂载 <code>data.url</code>。
-        在浏览器新标签直接打开 <code>https://app.slash.com/checkout/...</code> 常会报 <em>couldn't load</em>——这不是 Session 创建失败，而是错误的打开方式。
-      </div>
-      <p><strong>不要：</strong></p>
-      <ul>
-        <li>在浏览器地址栏 / 新标签直接打开托管 <code>url</code></li>
-        <li>用普通 <code>&lt;a href&gt;</code> 整页跳转到该 URL 当作收银台</li>
-        <li>把前端 <code>onComplete</code> 当作发货依据（履约仍以 Webhook / <code>GET Session</code> 为准）</li>
-      </ul>
-      <p><strong>正确做法：</strong></p>
-      <ol>
-        <li>后端创建 Session，把 <code>data.url</code>（或 <code>data.id</code>，由后端再查）安全下发给前端。</li>
-        <li>前端安装并加载 <a href="https://www.npmjs.com/package/@slashfi/checkout-js" rel="noopener" target="_blank"><code>@slashfi/checkout-js</code></a>（建议钉版本，例如 <code>0.0.4</code>）。</li>
-        <li>调用 <code>loadSlashCheckout()</code> → <code>createEmbeddedCheckoutPage({ url })</code> → <code>mount('#容器')</code>。</li>
-        <li>监听 SDK 的 <code>onComplete</code> / <code>onError</code> <strong>仅作 UI 提示</strong>；订单履约以收单 Webhook <code>checkout_session.completed</code> 或 <code>GET /checkout-sessions/{id}</code> 的 <code>status=complete</code> 为准。</li>
-      </ol>
-      <pre><code>&lt;div id="checkout"&gt;&lt;/div&gt;
-&lt;script type="module"&gt;
-  import { loadSlashCheckout } from '@slashfi/checkout-js';
-
-  const slashCheckout = await loadSlashCheckout();
-  const checkout = await slashCheckout.createEmbeddedCheckoutPage({
-    // 来自 POST /open/v1/acquiring/checkout-sessions 的 data.url
-    url: checkoutSessionUrl,
-    onReady: () =&gt; { /* 收银台已渲染 */ },
-    onProcessing: () =&gt; { /* 支付处理中（UI） */ },
-    onComplete: () =&gt; { /* 仅 UI；勿在此发货 */ },
-    onError: ({ code, message }) =&gt; { console.error(code, message); },
-  });
-  checkout.mount('#checkout');
-  // 换单前先 checkout.destroy()
-&lt;/script&gt;</code></pre>
-      <h3>约束与排障</h3>
-      <table>
-        <thead><tr><th>项</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td>同源 / HTTPS</td><td>商户嵌入页应为 HTTPS（本地可用 <code>http://localhost</code>）</td></tr>
-          <tr><td>单实例</td><td>同一页面同时只能有一个 Embedded Checkout；重新创建前先 <code>destroy()</code></td></tr>
-          <tr><td>MIME</td><td>若自托管 SDK 的 <code>.mjs</code>，静态服务器须返回 <code>Content-Type: text/javascript</code>（否则浏览器报 Failed to fetch dynamically imported module）</td></tr>
-          <tr><td><code>load_failed</code></td><td>SDK 约 30s 内未收到托管页协议消息；检查账号是否开通 Hosted Checkout、网络是否拦截 <code>app.slash.com</code>、Session 是否仍为 <code>open</code></td></tr>
-          <tr><td>Intent</td><td>Payment Intent 通常在买家支付后才出现；勿用 Session <code>id</code> 去查 Intent</td></tr>
-        </tbody>
-      </table>
-      <h2 id="get">6. 查询 Checkout Session</h2>
-      <div class="path">GET /open/v1/acquiring/checkout-sessions/{id}</div>
-
-      <h3>6.1 路径与规则</h3>
-      <table>
-        <thead><tr><th>项</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>{id}</code></td><td>创建时返回的 Session <code>id</code></td></tr>
-          <tr><td>归属</td><td>仅本商户可见；他商户 ID → <code>40401</code></td></tr>
-          <tr><td>关停后</td><td><code>acquiring_enabled=0</code> 时仍允许 <strong>GET</strong>（禁止新建 / PATCH）</td></tr>
-          <tr><td>非终态</td><td>平台会回源渠道刷新状态后再返回</td></tr>
-          <tr><td>终态</td><td>直接返回本地快照（<code>complete</code> / <code>expired</code> / <code>canceled</code> 等）</td></tr>
-        </tbody>
-      </table>
-
-      <h3>6.2 请求示例</h3>
-      <pre><code>GET /open/v1/acquiring/checkout-sessions/cs_xxx HTTP/1.1
-Host: {host}
-X-Access-Key-Id: ak_acq_xxx
-X-Merchant-Code: M2026...
-X-Vcc-Timestamp: 1723276800
-X-Vcc-Signature: ...</code></pre>
-
-      <h3>6.3 成功响应 data</h3>
-      <table>
-        <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>id</code></td><td>string</td><td>Checkout Session ID</td></tr>
-          <tr><td><code>url</code></td><td>string</td><td>托管收银台 URL</td></tr>
-          <tr><td><code>status</code></td><td>string</td><td><code>open</code> / <code>complete</code> / <code>expired</code> 等</td></tr>
-          <tr><td><code>amount</code></td><td>integer</td><td>美分</td></tr>
-          <tr><td><code>currency</code></td><td>string</td><td>如 <code>usd</code></td></tr>
-          <tr><td><code>clientOrderId</code></td><td>string|null</td><td>商户订单号</td></tr>
-          <tr><td><code>merchantCode</code></td><td>string</td><td>商户编码</td></tr>
-          <tr><td><code>createdAt</code></td><td>string</td><td>ISO-8601</td></tr>
-          <tr><td><code>expiresAt</code></td><td>string|null</td><td>过期时间 ISO-8601</td></tr>
-          <tr><td><code>paymentIntentId</code></td><td>string|null</td><td>关联 Intent；未知则为 <code>null</code></td></tr>
-          <tr><td><code>customMetadata</code></td><td>object</td><td>含商户字段及平台注入的只读保留字段</td></tr>
-          <tr><td><code>config</code></td><td>object|null</td><td>收银台配置快照（若有）</td></tr>
-          <tr><td><code>freshness</code></td><td>string</td><td>可选；回源失败时为 <code>CACHED</code></td></tr>
-          <tr><td><code>nonRealtime</code></td><td>boolean</td><td>可选；与 <code>freshness</code> 同时出现</td></tr>
-        </tbody>
-      </table>
-      <pre><code>{
-  "code": "0",
-  "message": "OK",
-  "data": {
-    "id": "cs_xxx",
-    "url": "https://checkout.example/cs_xxx",
-    "status": "complete",
-    "amount": 1999,
-    "currency": "usd",
-    "clientOrderId": "ORD-20260810-001",
-    "merchantCode": "M2026...",
-    "createdAt": "2026-08-10T10:00:00.000Z",
-    "expiresAt": "2026-08-11T10:00:00.000Z",
-    "paymentIntentId": "pi_xxx",
-    "customMetadata": {
-      "sku": "PLAN_PRO",
-      "uid": "u_10086"
-    },
-    "config": null
-  },
-  "traceId": "..."
-}</code></pre>
-      <p><strong>履约权威：</strong>Session <code>status=complete</code>（或 Webhook <code>checkout_session.completed</code>）。</p>
-
-      <h2 id="list">7. 列出 Checkout Session</h2>
-      <div class="path">GET /open/v1/acquiring/checkout-sessions</div>
-      <div class="note">仅返回<strong>本商户</strong>本地映射快照，<strong>不会</strong>透传渠道账号级 list。list <strong>不批量回源</strong>；要对单笔实时状态请用 §6 GET by id。</div>
-
-      <h3>7.1 Query 参数</h3>
-      <table>
-        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>cursor</code></td><td>string</td><td>否</td><td>上一页返回的 <code>nextCursor</code>；须为正整数字符串，非法 → <code>40001</code></td></tr>
-          <tr><td><code>limit</code></td><td>integer</td><td>否</td><td>默认 <code>20</code>，最大 <code>100</code></td></tr>
-          <tr><td><code>status</code></td><td>string</td><td>否</td><td><code>open</code> / <code>complete</code> / <code>expired</code></td></tr>
-          <tr><td><code>clientOrderId</code></td><td>string</td><td>否</td><td>精确匹配商户订单号</td></tr>
-        </tbody>
-      </table>
-      <p>排序：按本地主键 <code>id DESC</code>（近似 newest first）。</p>
-
-      <h3>7.2 请求示例</h3>
-      <pre><code>GET /open/v1/acquiring/checkout-sessions?limit=20&amp;status=open HTTP/1.1
-Host: {host}
-X-Access-Key-Id: ak_acq_xxx
-X-Merchant-Code: M2026...
-X-Vcc-Timestamp: 1723276800
-X-Vcc-Signature: ...</code></pre>
-
-      <h3>7.3 成功响应 data</h3>
-      <table>
-        <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>items</code></td><td>array</td><td>Session 列表；元素字段同创建响应，但<strong>不含</strong> <code>customMetadata</code> / <code>config</code></td></tr>
-          <tr><td><code>nextCursor</code></td><td>string|null</td><td>下一页游标；无更多数据时为 <code>null</code></td></tr>
-          <tr><td><code>count</code></td><td>integer</td><td>本页条数</td></tr>
-        </tbody>
-      </table>
-      <pre><code>{
-  "code": "0",
-  "message": "OK",
-  "data": {
-    "items": [
-      {
-        "id": "cs_xxx",
-        "url": "https://checkout.example/cs_xxx",
-        "status": "open",
-        "amount": 1999,
-        "currency": "usd",
-        "clientOrderId": "ORD-20260810-001",
-        "merchantCode": "M2026...",
-        "createdAt": "2026-08-10T10:00:00.000Z",
-        "expiresAt": "2026-08-11T10:00:00.000Z",
-        "paymentIntentId": null
-      }
-    ],
-    "nextCursor": "42",
-    "count": 1
-  },
-  "traceId": "..."
-}</code></pre>
-
-      <h2 id="patch">8. 更新 Checkout Session</h2>
-      <div class="path">PATCH /open/v1/acquiring/checkout-sessions/{id}</div>
-      <p>仅本地归属本商户且本地状态为 <code>open</code> 时可更新；经渠道 PATCH 成功后回写本地 <code>amount</code> / <code>expiresAt</code>。<strong>不会</strong>因 PATCH 单独出站 Webhook。</p>
-
-      <h3>8.1 路径与门禁</h3>
-      <table>
-        <thead><tr><th>项</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>{id}</code></td><td>Session ID</td></tr>
-          <tr><td>归属</td><td>非本商户 → <code>40401</code></td></tr>
-          <tr><td>开通</td><td><code>acquiring_enabled=0</code> → <code>40315</code></td></tr>
-          <tr><td>本地非 open</td><td>→ <code>40916</code> <code>OPEN_API_ACQUIRING_SESSION_NOT_PATCHABLE</code></td></tr>
-          <tr><td>渠道冲突（支付中/终态等 409）</td><td>→ <code>40916</code></td></tr>
-          <tr><td>渠道业务拒绝（400 等）</td><td>→ <code>40060</code></td></tr>
-        </tbody>
-      </table>
-
-      <h3>8.2 请求体</h3>
-      <table>
-        <thead><tr><th>字段</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>amount</code></td><td>integer</td><td>条件</td><td>美分；范围同创建 <code>1</code>…<code>99999999</code></td></tr>
-          <tr><td><code>expiresAt</code></td><td>string</td><td>条件</td><td>ISO-8601；须距今 ≥ <strong>30 分钟</strong>且 ≤ <strong>7 天</strong></td></tr>
-        </tbody>
-      </table>
-      <p><code>amount</code> 与 <code>expiresAt</code> <strong>至少填一个</strong>。未知顶层字段 → <code>40001</code>。</p>
-
-      <h3>8.3 请求示例</h3>
-      <pre><code>PATCH /open/v1/acquiring/checkout-sessions/cs_xxx HTTP/1.1
-Host: {host}
-Content-Type: application/json
-X-Access-Key-Id: ak_acq_xxx
-X-Merchant-Code: M2026...
-X-Vcc-Timestamp: 1723276800
-X-Vcc-Signature: ...
-
-{
-  "amount": 2999,
-  "expiresAt": "2026-08-12T12:00:00.000Z"
-}</code></pre>
-
-      <h3>8.4 成功响应 data</h3>
-      <p>字段同 §6 查询（含 <code>customMetadata</code> / <code>config</code> 若有）。</p>
-      <pre><code>{
-  "code": "0",
-  "message": "OK",
-  "data": {
-    "id": "cs_xxx",
-    "url": "https://checkout.example/cs_xxx",
-    "status": "open",
-    "amount": 2999,
-    "currency": "usd",
-    "clientOrderId": "ORD-20260810-001",
-    "merchantCode": "M2026...",
-    "createdAt": "2026-08-10T10:00:00.000Z",
-    "expiresAt": "2026-08-12T12:00:00.000Z",
-    "paymentIntentId": null,
-    "customMetadata": {
-      "sku": "PLAN_PRO",
-      "uid": "u_10086"
-    },
-    "config": null
-  },
-  "traceId": "..."
-}</code></pre>
-
-      <h2 id="payment-intent-list">9. 列出 Payment Intent</h2>
-      <div class="path">GET /open/v1/acquiring/payment-intents</div>
-      <div class="note">仅本商户已映射 Intent（本地表）。<strong>不会</strong>透传渠道账号级 list。关停后仍允许查询。</div>
-
-      <h3>9.1 Query 参数</h3>
-      <table>
-        <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>cursor</code></td><td>string</td><td>否</td><td>上一页 <code>nextCursor</code>；非法 → <code>40001</code></td></tr>
-          <tr><td><code>limit</code></td><td>integer</td><td>否</td><td>默认 <code>20</code>，最大 <code>100</code></td></tr>
-          <tr><td><code>status</code></td><td>string</td><td>否</td><td><code>pending</code> / <code>processing</code> / <code>succeeded</code> / <code>failed</code> / <code>canceled</code></td></tr>
-          <tr><td><code>checkoutSessionId</code></td><td>string</td><td>否</td><td>精确匹配关联 Session ID</td></tr>
-        </tbody>
-      </table>
-
-      <h3>9.2 请求示例</h3>
-      <pre><code>GET /open/v1/acquiring/payment-intents?status=succeeded&amp;limit=20 HTTP/1.1
-Host: {host}
-X-Access-Key-Id: ak_acq_xxx
-X-Merchant-Code: M2026...
-X-Vcc-Timestamp: 1723276800
-X-Vcc-Signature: ...</code></pre>
-
-      <h3>9.3 成功响应 data</h3>
-      <table>
-        <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>items</code></td><td>array</td><td>Intent 对象列表（字段见 §10.3）</td></tr>
-          <tr><td><code>nextCursor</code></td><td>string|null</td><td>下一页游标</td></tr>
-          <tr><td><code>count</code></td><td>integer</td><td>本页条数</td></tr>
-        </tbody>
-      </table>
-      <pre><code>{
-  "code": "0",
-  "message": "OK",
-  "data": {
-    "items": [
-      {
-        "id": "pi_xxx",
-        "status": "succeeded",
-        "amount": 1999,
-        "currency": "usd",
-        "checkoutSessionId": "cs_xxx",
-        "clientOrderId": "ORD-20260810-001",
-        "createdAt": "2026-08-10T10:01:00.000Z",
-        "updatedAt": "2026-08-10T10:05:00.000Z"
-      }
-    ],
-    "nextCursor": null,
-    "count": 1
-  },
-  "traceId": "..."
-}</code></pre>
-
-      <h2 id="payment-intent-get">10. 查询 Payment Intent</h2>
-      <div class="path">GET /open/v1/acquiring/payment-intents/{id}</div>
-      <p><strong>对账权威：</strong>Intent <code>status=succeeded</code>（或 Webhook <code>payment_intent.succeeded</code>）。履约仍以 Session <code>complete</code> 为主路径。</p>
-
-      <h3>10.1 路径与规则</h3>
-      <table>
-        <thead><tr><th>项</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>{id}</code></td><td>Payment Intent ID</td></tr>
-          <tr><td>归属</td><td>本地映射属本商户，或渠道响应含本商户 <code>checkoutSessionId</code> → 允许；否则 <code>40401</code></td></tr>
-          <tr><td>无 Session 关联（如开票来源 Intent）</td><td><code>40401</code>（本产品线不服务）</td></tr>
-          <tr><td>非终态</td><td>回源渠道刷新并 upsert</td></tr>
-          <tr><td>终态</td><td>可直接返回本地（<code>succeeded</code> / <code>failed</code> / <code>canceled</code>）</td></tr>
-          <tr><td>回源失败且本地有行</td><td>200 + 本地快照 + <code>freshness: CACHED</code></td></tr>
-        </tbody>
-      </table>
-
-      <h3>10.2 请求示例</h3>
-      <pre><code>GET /open/v1/acquiring/payment-intents/pi_xxx HTTP/1.1
-Host: {host}
-X-Access-Key-Id: ak_acq_xxx
-X-Merchant-Code: M2026...
-X-Vcc-Timestamp: 1723276800
-X-Vcc-Signature: ...</code></pre>
-
-      <h3>10.3 成功响应 data</h3>
-      <table>
-        <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>id</code></td><td>string</td><td>Payment Intent ID</td></tr>
-          <tr><td><code>status</code></td><td>string</td><td><code>pending</code> / <code>processing</code> / <code>succeeded</code> / <code>failed</code> / <code>canceled</code></td></tr>
-          <tr><td><code>amount</code></td><td>integer</td><td>美分</td></tr>
-          <tr><td><code>currency</code></td><td>string</td><td>如 <code>usd</code></td></tr>
-          <tr><td><code>checkoutSessionId</code></td><td>string</td><td>关联 Checkout Session</td></tr>
-          <tr><td><code>clientOrderId</code></td><td>string|null</td><td>来自关联 Session</td></tr>
-          <tr><td><code>createdAt</code></td><td>string</td><td>ISO-8601</td></tr>
-          <tr><td><code>updatedAt</code></td><td>string</td><td>ISO-8601</td></tr>
-          <tr><td><code>freshness</code> / <code>nonRealtime</code></td><td>—</td><td>可选；回源失败降级时出现</td></tr>
-        </tbody>
-      </table>
-      <pre><code>{
-  "code": "0",
-  "message": "OK",
-  "data": {
-    "id": "pi_xxx",
-    "status": "succeeded",
-    "amount": 1999,
-    "currency": "usd",
-    "checkoutSessionId": "cs_xxx",
-    "clientOrderId": "ORD-20260810-001",
-    "createdAt": "2026-08-10T10:01:00.000Z",
-    "updatedAt": "2026-08-10T10:05:00.000Z"
-  },
-  "traceId": "..."
-}</code></pre>
-      <div class="tip">
-        <strong>如何拿到 Intent id：</strong>Session 响应 / completed Webhook 的 <code>paymentIntentId</code>（可能暂时为 <code>null</code>）、本接口 list、或 <code>payment_intent.*</code> 出站事件。创建 Session 当下 Intent 可能尚未生成，<code>null</code> 为合法中间态。
-      </div>
-
-      <h2 id="webhook">11. 收单 Webhook（平台 → 商户）</h2>
-      <div class="tip">
-        <strong>独立配置：</strong>收单回调使用独立 Webhook Secret（与 API SecretKey 不同）。一期由运营为商户配置回调 URL 与 Secret。
-      </div>
-
-      <h3>11.1 HTTP 约定</h3>
-      <table>
-        <thead><tr><th>项</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td>方法</td><td><code>POST</code></td></tr>
-          <tr><td>Content-Type</td><td><code>application/json; charset=utf-8</code></td></tr>
-          <tr><td>成功</td><td>返回 HTTP <strong>2xx</strong>（建议 200）；非 2xx 可能重试</td></tr>
-          <tr><td>超时</td><td>连接/读超时约数秒级（以部署为准）</td></tr>
-        </tbody>
-      </table>
-
-      <h3>11.2 签名头（与 Open API 入站算法不同）</h3>
-      <table>
-        <thead><tr><th>头</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>X-Vcc-Signature</code></td><td>HMAC-SHA256，小写 hex</td></tr>
-          <tr><td><code>X-Vcc-Timestamp</code></td><td>Unix 时间戳，单位<strong>毫秒</strong></td></tr>
-          <tr><td><code>X-Vcc-Nonce</code></td><td>32 字符 hex</td></tr>
-          <tr><td><code>X-Vcc-Event-Id</code></td><td>与 body <code>eventId</code> 一致，用于幂等</td></tr>
-        </tbody>
-      </table>
-      <pre><code>payload = timestamp + nonce + body_raw_utf8
-expected = hex_lower( HMAC_SHA256( UTF8(WebhookSecret), UTF8(payload) ) )</code></pre>
-      <ul>
-        <li><code>body</code> 必须用<strong>原始请求体</strong>，勿重新 JSON 序列化。</li>
-        <li>Webhook Secret ≠ API SecretKey。</li>
-        <li>建议校验时间戳偏差，并对 <code>eventId</code> / <code>nonce</code> 去重。</li>
-      </ul>
-
-      <h3>11.3 事件类型</h3>
-      <table>
-        <thead><tr><th>eventType</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>merchant.webhook.acquiring.checkout_session.completed</code></td><td>Session → complete（履约权威）；data 可含 <code>paymentIntentId</code>（可为 null）</td></tr>
-          <tr><td><code>merchant.webhook.acquiring.payment_intent.succeeded</code></td><td>Intent → succeeded（对账通过）</td></tr>
-          <tr><td><code>merchant.webhook.acquiring.payment_intent.failed</code></td><td>Intent → failed（非退款确认）</td></tr>
-        </tbody>
-      </table>
-
-      <h3>11.4 载荷结构（Session completed）</h3>
-      <pre><code>{
-  "eventType": "merchant.webhook.acquiring.checkout_session.completed",
-  "eventId": "mwh_evt_acq_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "occurredAt": "2026-08-10T10:05:00.000Z",
-  "merchantCode": "M2026...",
-  "data": {
-    "checkoutSessionId": "cs_xxx",
-    "status": "complete",
-    "amount": 1999,
-    "currency": "usd",
-    "clientOrderId": "ORD-20260810-001",
-    "paymentIntentId": "pi_xxx",
-    "customMetadata": {
-      "sku": "PLAN_PRO",
-      "uid": "u_10086"
-    },
-    "slashEventId": "可选，渠道侧事件 ID",
-    "slashEventTimestamp": "可选"
-  }
-}</code></pre>
-      <table>
-        <thead><tr><th>data 字段</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>checkoutSessionId</code></td><td>与 Open API Session <code>id</code> 相同</td></tr>
-          <tr><td><code>status</code></td><td>完成态语义（<code>complete</code>）</td></tr>
-          <tr><td><code>amount</code> / <code>currency</code></td><td>与创建一致</td></tr>
-          <tr><td><code>clientOrderId</code></td><td>若创建时传入</td></tr>
-          <tr><td><code>paymentIntentId</code></td><td>已知则 string；未知则为 <code>null</code></td></tr>
-          <tr><td><code>customMetadata</code></td><td>创建时写入并含平台注入字段</td></tr>
-          <tr><td><code>slashEventId</code> / <code>slashEventTimestamp</code></td><td>可选，渠道侧追踪</td></tr>
-        </tbody>
-      </table>
-
-      <h3>11.5 载荷结构（Payment Intent 终态）</h3>
-      <pre><code>{
-  "eventType": "merchant.webhook.acquiring.payment_intent.succeeded",
-  "eventId": "mwh_evt_acq_pi_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "occurredAt": "2026-08-10T10:05:01.000Z",
-  "merchantCode": "M2026...",
-  "data": {
-    "paymentIntentId": "pi_xxx",
-    "checkoutSessionId": "cs_xxx",
-    "status": "succeeded",
-    "amount": 1999,
-    "currency": "usd",
-    "clientOrderId": "ORD-20260810-001",
-    "updatedAt": "2026-08-10T10:05:00.000Z"
-  }
-}</code></pre>
-      <table>
-        <thead><tr><th>data 字段</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td><code>paymentIntentId</code></td><td>必有</td></tr>
-          <tr><td><code>checkoutSessionId</code></td><td>关联 Session</td></tr>
-          <tr><td><code>status</code></td><td><code>succeeded</code> 或 <code>failed</code></td></tr>
-          <tr><td><code>amount</code> / <code>currency</code></td><td>金额币种</td></tr>
-          <tr><td><code>clientOrderId</code></td><td>可空</td></tr>
-          <tr><td><code>updatedAt</code></td><td>ISO-8601</td></tr>
-        </tbody>
-      </table>
-      <p>同一资源同一终态的 <code>eventId</code> 稳定派生；商户须按 <code>eventId</code> 幂等。Session completed 与 Intent succeeded 可能先后到达，请按 <code>clientOrderId</code> / Session id 幂等履约。</p>
-
-      <h2 id="errors">12. 错误码（收单相关）</h2>
-      <table>
-        <thead><tr><th>HTTP</th><th>code</th><th>含义</th></tr></thead>
-        <tbody>
-          <tr><td>400</td><td><code>40001</code> / <code>VALIDATION_ERROR</code></td><td>参数非法（金额、币种、expiresAt、cursor、未知字段等）</td></tr>
-          <tr><td>400</td><td><code>40003</code> / <code>OPEN_API_IDEMPOTENCY_REQUIRED</code></td><td>缺少 Idempotency-Key</td></tr>
-          <tr><td>400</td><td><code>40060</code> / <code>ACQUIRING_CHANNEL_REJECTED</code></td><td>渠道拒绝（含部分 PATCH 业务拒绝）</td></tr>
-          <tr><td>401</td><td><code>OPEN_API_SIGNATURE_INVALID</code> 等</td><td>签名 / 凭证 / 时钟问题</td></tr>
-          <tr><td>403</td><td><code>40314</code> / <code>OPEN_API_CREDENTIAL_SCOPE_DENIED</code></td><td>Key 类型与路径不匹配</td></tr>
-          <tr><td>403</td><td><code>40315</code> / <code>OPEN_API_ACQUIRING_DISABLED</code></td><td>商户未开通收单（POST/PATCH）</td></tr>
-          <tr><td>404</td><td><code>40401</code> / <code>NOT_FOUND</code></td><td>Session/Intent 不存在或不属于本商户</td></tr>
-          <tr><td>409</td><td><code>40904</code> / <code>OPEN_API_IDEMPOTENCY_CONFLICT</code></td><td>同幂等键不同请求体</td></tr>
-          <tr><td>409</td><td><code>40916</code> / <code>OPEN_API_ACQUIRING_SESSION_NOT_PATCHABLE</code></td><td>Session 当前不可 PATCH</td></tr>
-          <tr><td>502</td><td><code>50260</code> / <code>ACQUIRING_CHANNEL_UNAVAILABLE</code></td><td>渠道不可用</td></tr>
-        </tbody>
-      </table>
-
-      <h2 id="limits">13. 限流与约束</h2>
-      <table>
-        <thead><tr><th>项</th><th>说明</th></tr></thead>
-        <tbody>
-          <tr><td>限流</td><td>创建约 30 rpm / 查询约 120 rpm 每商户（可配置）</td></tr>
-          <tr><td>币种</td><td>仅 <code>usd</code></td></tr>
-          <tr><td>金额</td><td>整数美分 <code>1</code>–<code>99999999</code></td></tr>
-          <tr><td>list</td><td>默认 20 / 最大 100；仅本商户本地快照</td></tr>
-          <tr><td>幂等</td><td>创建必带；建议每个业务订单使用稳定且唯一的 Key</td></tr>
-          <tr><td>安全</td><td>Secret / Webhook Secret 仅服务端持有，禁止下发到浏览器或 App</td></tr>
-        </tbody>
-      </table>
-
-      <h2 id="examples">14. 签名示例（Python）</h2>
-      <h3>14.1 调用 Open API（创建 Session）</h3>
-      <pre><code>import hashlib, hmac, json, time, uuid, urllib.request
-
-BASE = "https://{host}"
-AK = "YOUR_ACQUIRING_ACCESS_KEY"
-SK = "YOUR_API_SECRET"
-MERCHANT = "M..."
-
-body_obj = {
-    "amount": 1999,
-    "currency": "usd",
-    "clientOrderId": "ORD-001",
-    "customMetadata": {"sku": "PLAN_PRO"},
+const origin = "https://api.saferoute.global";
+const checkoutOrigin = "https://checkout.saferoute.global";
+const { VCC_ACCESS_KEY_ID, VCC_SECRET_KEY, VCC_MERCHANT_CODE,
+  VCC_IDEMPOTENCY_KEY, VCC_MERCHANT_ORDER_ID } = process.env;
+if (![VCC_ACCESS_KEY_ID, VCC_SECRET_KEY, VCC_MERCHANT_CODE,
+  VCC_IDEMPOTENCY_KEY, VCC_MERCHANT_ORDER_ID].every(Boolean)) {
+  throw new Error("请在服务端设置凭据、原订单号和持久化的幂等键");
 }
-body = json.dumps(body_obj, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-method = "POST"
-path = "/open/v1/acquiring/checkout-sessions"
-query = ""
-body_hash = hashlib.sha256(body).hexdigest()
-canonical = f"{method}\n{path}\n{query}\n{body_hash}"
-ts = str(int(time.time()))
-sig = hmac.new(SK.encode(), canonical.encode(), hashlib.sha256).hexdigest()
 
-req = urllib.request.Request(
-    BASE + path,
-    data=body,
-    method=method,
-    headers={
-        "Content-Type": "application/json",
-        "X-Access-Key-Id": AK,
-        "X-Merchant-Code": MERCHANT,
-        "X-Vcc-Timestamp": ts,
-        "X-Vcc-Signature": sig,
-        "Idempotency-Key": str(uuid.uuid4()),
-    },
-)
-print(urllib.request.urlopen(req).read().decode())</code></pre>
+export const rfc3986 = value =&gt; encodeURIComponent(value)
+  .replace(/[!'()*]/g, c =&gt; "%" + c.charCodeAt(0).toString(16).toUpperCase());
 
-      <h3>14.2 验签收单 Webhook</h3>
-      <pre><code>import hashlib, hmac
+export function canonicalQuery(entries) {
+  return entries.map(([k, v]) =&gt; [rfc3986(k), rfc3986(v ?? "")])
+    .sort(([ak, av], [bk, bv]) =&gt; ak === bk
+      ? (av &lt; bv ? -1 : av &gt; bv ? 1 : 0)
+      : (ak &lt; bk ? -1 : 1))
+    .map(([k, v]) =&gt; k + "=" + v).join("&amp;");
+}
 
-def verify_acquiring_webhook(secret: str, timestamp: str, nonce: str, body: bytes, signature: str) -&gt; bool:
-    payload = (timestamp + nonce).encode("utf-8") + body
-    expected = hmac.new(secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(expected, signature.lower())</code></pre>
+export function signRequest({ method, path, queryEntries = [], rawBody = "",
+  idempotencyKey, timestamp = String(Math.floor(Date.now() / 1000)),
+  nonce = crypto.randomBytes(16).toString("hex") }) {
+  const query = canonicalQuery(queryEntries);
+  const bodyHash = crypto.createHash("sha256")
+    .update(Buffer.from(rawBody, "utf8")).digest("hex");
+  const canonical = [timestamp, nonce, method.toUpperCase(), path,
+    query, bodyHash].join("\n");
+  const signature = crypto.createHmac("sha256", Buffer.from(VCC_SECRET_KEY, "utf8"))
+    .update(Buffer.from(canonical, "utf8")).digest("hex");
+  const headers = {
+    "X-Access-Key-Id": VCC_ACCESS_KEY_ID,
+    "X-Merchant-Code": VCC_MERCHANT_CODE,
+    "X-Vcc-Timestamp": timestamp,
+    "X-Vcc-Nonce": nonce,
+    "X-Vcc-Signature": signature
+  };
+  if (rawBody) headers["Content-Type"] = "application/json";
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
+  return { url: origin + path + (query ? "?" + query : ""),
+    method: method.toUpperCase(), headers,
+    ...(rawBody ? { body: rawBody } : {}) };
+}
 
-      <h2 id="checklist">15. 联调检查清单</h2>
-      <ul class="checklist">
-        <li>使用 <strong>ACQUIRING</strong> Key，签名通过</li>
-        <li>未开通时创建返回 <code>40315</code>；开通后可创建并拿到 <code>url</code></li>
-        <li>前端用 <code>@slashfi/checkout-js</code> 嵌入 <code>url</code>，能看到收银台；直接打开 <code>url</code> 出现 couldn't load（属预期）</li>
-        <li>同 <code>Idempotency-Key</code> 重放返回同一 <code>id</code></li>
-        <li>改 body 同 Key → <code>40904</code></li>
-        <li>非 <code>ACQUIRING</code> 凭证调用本路径 → <code>40314</code></li>
-        <li>list Session / Intent 仅见本商户数据；他商户 id → <code>40401</code></li>
-        <li>PATCH open Session 成功；终态 / 关停分别得到 <code>40916</code> / <code>40315</code></li>
-        <li>Webhook 验签通过；按 <code>eventId</code> 幂等更新订单</li>
-        <li><code>GET Session</code> 完成后可查到 <code>complete</code>；对账可用 Intent <code>succeeded</code></li>
-      </ul>
+// 首次请求前保存这个正文；重试复用相同正文和原幂等键。
+// 仅在已开通 TEST 钱包、有效策略与真实资格全部确认后运行。
+const rawBody = JSON.stringify({
+  amountMinor: 1000, currency: "USD", captureMode: "AUTOMATIC",
+  paymentMethod: "APPLE_PAY", merchantOrderId: VCC_MERCHANT_ORDER_ID,
+  regionCountry: "US", walletExternallyEligible: true,
+  displayMetadata: { item: "Example order" }
+});
+const { url, ...init } = signRequest({ method: "POST",
+  path: "/open/v1/acquiring/payments", rawBody,
+  idempotencyKey: VCC_IDEMPOTENCY_KEY });
+const response = await fetch(url, { ...init, signal: AbortSignal.timeout(15000) });
+const result = await response.json();
+if (!response.ok || result.code !== "0") {
+  throw new Error("HTTP " + response.status + "; code=" + result.code +
+    "; traceId=" + result.traceId);
+}
+const payment = result.data;
+const checkoutHref = payment.checkoutUrl
+  ? new URL(payment.checkoutUrl, checkoutOrigin).href : null;
+// 保存 paymentId，将 checkoutHref 仅交给本订单买家，不记录 token。
+console.log({ paymentId: payment.paymentId, status: payment.status });
+// 超时不等于失败：用原订单/幂等键重试或签名查询，每次使用新 nonce。</code></pre></div>
+<h3>cURL 请求形状</h3><p>下列头值由服务端按实际 body、路径与本次时间/nonce 生成。<code>payment.json</code> 须与签名使用的文件字节完全一致；以 <code>--data-binary</code> 发送。</p>
+<div class="code-panel"><div class="code-bar"><span>cURL · 签名头由服务端生成</span></div><pre tabindex="0" aria-label="cURL 请求"><code data-copy>curl --request POST 'https://api.saferoute.global/open/v1/acquiring/payments' \
+  --header 'Content-Type: application/json' \
+  --header "X-Access-Key-Id: $VCC_ACCESS_KEY_ID" \
+  --header "X-Merchant-Code: $VCC_MERCHANT_CODE" \
+  --header "X-Vcc-Timestamp: $VCC_TIMESTAMP" \
+  --header "X-Vcc-Nonce: $VCC_NONCE" \
+  --header "X-Vcc-Signature: $VCC_SIGNATURE" \
+  --header "Idempotency-Key: $VCC_IDEMPOTENCY_KEY" \
+  --data-binary '@payment.json'</code></pre></div>
+</section>
 
-      <h2 id="changelog">16. 变更记录</h2>
-      <table>
-        <thead><tr><th>日期</th><th>变更</th></tr></thead>
-        <tbody>
-          <tr><td>2026-08-11</td><td>新增 §5.6：托管收银台必须用 <code>@slashfi/checkout-js</code> 嵌入；禁止浏览器直开 <code>url</code></td></tr>
-          <tr><td>2026-08-11</td><td>补齐 List / PATCH Session、Payment Intent get/list 完整字段表与请求响应示例；Webhook 三事件；错误码 <code>40916</code></td></tr>
-          <tr><td>2026-08-11</td><td>发布独立 HTML 公网文档（本页）</td></tr>
-          <tr><td>2026-08-10</td><td>初版：收单 Checkout Session 创建/查询、独立 Webhook、错误码与示例</td></tr>
-        </tbody>
-      </table>
+<section class="doc-section" id="auth" data-search>
+<div class="section-heading"><p class="eyebrow">AUTHENTICATION</p><h2 tabindex="-1">鉴权与签名</h2><p class="section-intro">本文商户 Open API 均使用 HMAC-SHA256。Secret 只保存在商户服务端，不放入 HTML、浏览器、URL 或客户端日志。</p></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="签名请求头"><table><thead><tr><th>请求头</th><th>要求</th><th>内容</th></tr></thead><tbody>
+<tr><td><code>X-Access-Key-Id</code></td><td>必填</td><td>平台分配的 ACQUIRING AccessKeyId。</td></tr><tr><td><code>X-Merchant-Code</code></td><td>必填</td><td>与凭据绑定的商户编码一致。</td></tr><tr><td><code>X-Vcc-Timestamp</code></td><td>必填</td><td>Unix <b>秒</b>的普通十进制整数，不传毫秒。</td></tr><tr><td><code>X-Vcc-Nonce</code></td><td>必填</td><td><code>[A-Za-z0-9._~-]{16,128}</code>；每次 HTTP 请求使用新值，包括重试。</td></tr><tr><td><code>X-Vcc-Signature</code></td><td>必填</td><td>64 位小写十六进制 HMAC-SHA256。</td></tr><tr><td><code>Idempotency-Key</code></td><td>写操作必填</td><td>非空，长度不超过 128 字符；业务动作重试复用原值。</td></tr><tr><td><code>Content-Type</code></td><td>JSON 时</td><td><code>application/json</code>，UTF-8 编码。</td></tr></tbody></table></div>
+<p>每个新收单凭据绑定一个商户、一个 MID、一个 TEST / LIVE 环境及操作 scope，请求不能改选归属。时钟偏差默认容忍前后 10 分钟，实际以接入配置为准；时间解析为整数后以十进制文本签名。</p>
+<h3>六行 Canonical Request</h3><p>依次用五个 LF（<code>\n</code>）连接，末尾不加换行。无 query 保留第五行空行；路径不含域名和问号。</p>
+<div class="code-panel"><div class="code-bar"><span>Canonical · 顺序固定</span></div><pre tabindex="0" aria-label="Canonical 六行格式"><code data-copy>timestamp_epoch_seconds
+nonce_original_value
+HTTP_METHOD_UPPERCASE
+/open/v1/acquiring/payments
+canonical_query_without_question_mark
+sha256_hex_of_exact_request_body_bytes</code></pre></div>
+<p><code>signature = hexLower(HMAC-SHA256(UTF8(SecretKey), UTF8(canonical)))</code>。Secret 是 UTF-8 文本 key，不做 hex 解码；输出使用 hex，不使用 Base64。</p>
+<h3>查询串规范化</h3><ol><li>取得解码后的全部 key/value，保留重复项与空值；已有 URL 可用 <code>[...new URL(url).searchParams.entries()]</code>。原 query 的 <code>+</code> 解码为空格，字面加号应传 <code>%2B</code>。</li><li>分别用 UTF-8 RFC 3986 编码：空格 <code>%20</code>，星号 <code>%2A</code>，<code>~</code> 不编码。</li><li>按编码后的 key、再按编码后的 value 升序排序，完全重复项仍保留，以 <code>key=value</code> 和 <code>&amp;</code> 连接。发送相同参数。</li></ol>
+<div class="code-panel"><div class="code-bar"><span>规范化示例 · 重复参数不合并</span></div><pre tabindex="0" aria-label="查询规范化示例"><code data-copy>输入 entries:
+[["z","two"],["z","one"],["name","a b"],["star","*"],["unicode","汉 字"]]
 
-    </main>
-  </div>
+canonicalQuery:
+name=a%20b&amp;star=%2A&amp;unicode=%E6%B1%89%20%E5%AD%97&amp;z=one&amp;z=two</code></pre></div>
+<div class="callout warn"><strong>签名覆盖实际发送的原始 body</strong>签名后不得重新 stringify、改变空白或加末尾换行。空 body 与 <code>{}</code> 不同；空 body SHA-256 为 <code>e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>。完整函数见<a href="#quickstart">快速开始</a>。</div>
+<h3>Operation scope</h3><div class="table-wrap" tabindex="0" role="region" aria-label="操作权限"><table><thead><tr><th>Scope</th><th>覆盖操作</th></tr></thead><tbody><tr><td><code>payments:write</code></td><td>Payment / Refund / Dispute 写入、Session 创建/更新及提现写入路由；权限不代表该能力已受理。</td></tr><tr><td><code>payments:read</code></td><td>Payment、Refund、Dispute、Payout 详情及兼容 Payment Intent 读取。</td></tr><tr><td><code>checkout:read</code></td><td>兼容 Session 列表/详情与旧 Hosted Checkout 读取。</td></tr><tr><td><code>balance:read</code></td><td>余额查询。</td></tr></tbody></table></div>
+</section>
+
+<section class="doc-section" id="common" data-search>
+<div class="section-heading"><p class="eyebrow">CONVENTIONS</p><h2 tabindex="-1">通用约定与接口目录</h2><p class="section-intro">请求和响应使用 JSON、UTF-8 与 camelCase。HTTP 状态和字符串业务码共同表示调用结果。</p></div>
+<div class="example-grid"><div class="code-panel"><div class="code-bar"><span>成功信封</span></div><pre tabindex="0" aria-label="成功响应信封"><code data-copy>{
+  "code": "0",
+  "message": "OK",
+  "data": { "paymentId": "example-payment-id", "status": "CREATED" },
+  "traceId": "example-trace-id"
+}</code></pre></div><div class="code-panel"><div class="code-bar"><span>错误信封 · null data 省略</span></div><pre tabindex="0" aria-label="错误响应信封"><code data-copy>{
+  "code": "40904",
+  "message": "幂等键与已处理请求不一致",
+  "traceId": "example-trace-id"
+}</code></pre></div></div>
+<h3>金额、时间与空值</h3><p>USD 10.25 传整数 <code>1025</code>；兼容 Session / Intent 的 <code>amount</code> 同样为美分。业务时间使用 ISO 8601；API 签名时间为 Unix <b>秒</b>，Webhook 签名时间为 Unix <b>毫秒</b>。现代响应的可空属性可能省略，兼容 Map 响应可保留 <code>null</code>。</p>
+<h3>幂等与不确定结果</h3><p>同一业务动作保持原 <code>Idempotency-Key</code>、method/path/query/body；每次重试更新 timestamp、nonce 和 signature。同键异参或仍处理中可能返回 <code>409 / 40904</code>。超时或 5xx 先确认原资源或用原键重试，不换键再次建单。</p>
+<h3>分页结构</h3><p>把返回的 <code>nextCursor</code> 原样续传；为空表示无下一页。不同接口游标不互通，不解析或自行递增。</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="分页响应"><table><thead><tr><th>接口</th><th>limit 默认 / 范围</th><th>data 列表结构</th></tr></thead><tbody><tr><td>Payment</td><td>50 / 1–100</td><td><code>{payments: [...], nextCursor: null | "..."}</code></td></tr><tr><td>Refund</td><td>50 / 1–100</td><td><code>{refunds: [...], nextCursor: null | "..."}</code></td></tr><tr><td>Dispute</td><td>50 / 1–100</td><td><code>{disputes: [...], nextCursor: null | "..."}</code></td></tr><tr><td>兼容 Session / Intent</td><td>20 / 1–100（越界钳制）</td><td><code>{items: [...], nextCursor: null | "...", count: 0}</code></td></tr></tbody></table></div>
+<h3>接口目录</h3><p class="muted">以下路径相对 <code>/open/v1/acquiring</code>。全部写操作需要幂等键；“不可用”路由仍先执行认证、权限与参数校验。</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="完整收单接口目录"><table><thead><tr><th>方法 / 路径</th><th>Scope</th><th>用途 / 当前边界</th></tr></thead><tbody>
+<tr><td><span class="method post">POST</span><code>/payments</code></td><td><code>payments:write</code></td><td><a href="#payments">创建支付</a> · 已开通 TEST / AUTOMATIC 钱包</td></tr>
+<tr><td><span class="method get">GET</span><code>/payments</code></td><td><code>payments:read</code></td><td>支付列表</td></tr>
+<tr><td><span class="method get">GET</span><code>/payments/{paymentId}</code></td><td><code>payments:read</code></td><td>支付详情</td></tr>
+<tr><td><span class="method post">POST</span><code>/payments/{paymentId}/capture</code></td><td><code>payments:write</code></td><td>不可用 · 503 / 50260</td></tr>
+<tr><td><span class="method post">POST</span><code>/payments/{paymentId}/void</code></td><td><code>payments:write</code></td><td>不可用 · 503 / 50260</td></tr>
+<tr><td><span class="method post">POST</span><code>/payments/{paymentId}/refunds</code></td><td><code>payments:write</code></td><td><a href="#refunds">创建退款</a> · TEST 能力，LIVE 未开放</td></tr>
+<tr><td><span class="method get">GET</span><code>/payments/{paymentId}/refunds</code></td><td><code>payments:read</code></td><td>退款列表</td></tr>
+<tr><td><span class="method get">GET</span><code>/payments/{paymentId}/refunds/{refundId}</code></td><td><code>payments:read</code></td><td>退款详情</td></tr>
+<tr><td><span class="method get">GET</span><code>/disputes</code></td><td><code>payments:read</code></td><td><a href="#disputes">争议列表</a></td></tr>
+<tr><td><span class="method get">GET</span><code>/disputes/{disputeId}</code></td><td><code>payments:read</code></td><td>争议详情</td></tr>
+<tr><td><span class="method post">POST</span><code>/disputes/{disputeId}/accept</code></td><td><code>payments:write</code></td><td>接受争议 · TEST 能力，LIVE 未开放</td></tr>
+<tr><td><span class="method post">POST</span><code>/disputes/{disputeId}/evidence</code></td><td><code>payments:write</code></td><td>证据引用 · TEST 能力，LIVE 未开放</td></tr>
+<tr><td><span class="method get">GET</span><code>/balance</code></td><td><code>balance:read</code></td><td><a href="#balance">USD 余额</a></td></tr>
+<tr><td><span class="method get">GET</span><code>/payouts/{payoutId}</code></td><td><code>payments:read</code></td><td><a href="#payouts">历史提现详情</a></td></tr>
+<tr><td><span class="method post">POST</span><code>/payouts</code></td><td><code>payments:write</code></td><td>不可用 · 400 / 40001</td></tr>
+<tr><td><span class="method post">POST</span><code>/payouts/{payoutId}/approve</code></td><td><code>payments:write</code></td><td>不可用 · 400 / 40001</td></tr>
+<tr><td><span class="method post">POST</span><code>/payouts/{payoutId}/reject</code></td><td><code>payments:write</code></td><td>不可用 · 400 / 40001</td></tr>
+<tr><td><span class="method post">POST</span><code>/checkout-sessions</code></td><td><code>payments:write</code></td><td><a href="#checkout">兼容 Session 创建</a></td></tr>
+<tr><td><span class="method get">GET</span><code>/checkout-sessions</code></td><td><code>checkout:read</code></td><td>兼容 Session 列表</td></tr>
+<tr><td><span class="method get">GET</span><code>/checkout-sessions/{id}</code></td><td><code>checkout:read</code></td><td>兼容 Session 详情</td></tr>
+<tr><td><span class="method patch">PATCH</span><code>/checkout-sessions/{id}</code></td><td><code>payments:write</code></td><td>兼容 Session 更新</td></tr>
+<tr><td><span class="method get">GET</span><code>/payment-intents</code></td><td><code>payments:read</code></td><td><a href="#intents">兼容 Intent 列表</a></td></tr>
+<tr><td><span class="method get">GET</span><code>/payment-intents/{id}</code></td><td><code>payments:read</code></td><td>兼容 Intent 详情</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="doc-section" id="payments" data-search>
+<div class="section-heading"><p class="eyebrow">PAYMENTS</p><h2 tabindex="-1">支付 Payment</h2><p class="section-intro">新接入优先使用的支付模型。创建后按 checkoutUrl 跳转到平台收银台，通过签名查询确认最终支付结果。</p></div>
+<div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/payments</code><span class="scope">payments:write · Idempotency-Key</span></div>
+<div class="callout warn"><strong>创建前提：TEST + AUTOMATIC + 已获准的钱包</strong>语法枚举含 VISA、MASTERCARD、APPLE_PAY、GOOGLE_PAY；当前现代创建路径只受理已开通且符合策略与真实外部资格的钱包。VISA / MASTERCARD、LIVE 与 MANUAL 在该路径当前不受理。<code>walletExternallyEligible=true</code> 不能代替实际开通、设备或其他资格条件。</div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="创建支付请求字段"><table><thead><tr><th>字段</th><th>类型 / 必填</th><th>约束</th></tr></thead><tbody>
+<tr><td><code>amountMinor</code></td><td>integer · <span class="required">必填</span></td><td>1–99,999,999，美分。</td></tr><tr><td><code>currency</code></td><td>string · <span class="required">必填</span></td><td>仅 <code>USD</code>。</td></tr><tr><td><code>paymentMethod</code></td><td>string · <span class="required">必填</span></td><td>VISA / MASTERCARD / APPLE_PAY / GOOGLE_PAY；实际受上述能力限制。</td></tr><tr><td><code>merchantOrderId</code></td><td>string · <span class="required">必填</span></td><td>非空，≤128 字符。</td></tr><tr><td><code>captureMode</code></td><td>string · <span class="optional">可选</span></td><td>默认 AUTOMATIC；语法含 MANUAL，当前现代钱包仅 AUTOMATIC。</td></tr><tr><td><code>regionCountry</code></td><td>string · <span class="optional">可选</span></td><td>最多 2 字符，默认 US，需符合区域策略。</td></tr><tr><td><code>walletExternallyEligible</code></td><td>boolean · <span class="optional">可选</span></td><td>默认 false；钱包要求真实资格已确认并传 true。</td></tr><tr><td><code>displayMetadata</code></td><td>object · <span class="optional">可选</span></td><td>最多 16 项；key 非空且 ≤64 字符，value 非空字符串且 ≤256 字符。禁止卡号、CVV、有效期、token、secret、password 等敏感数据。</td></tr>
+</tbody></table></div>
+<div class="example-grid"><div class="code-panel"><div class="code-bar"><span>请求 · 已开通 TEST 钱包格式示例</span></div><pre tabindex="0" aria-label="创建支付请求"><code data-copy>{
+  "amountMinor": 1000,
+  "currency": "USD",
+  "paymentMethod": "APPLE_PAY",
+  "merchantOrderId": "ORDER-20261017-001",
+  "captureMode": "AUTOMATIC",
+  "regionCountry": "US",
+  "walletExternallyEligible": true,
+  "displayMetadata": { "item": "Example order" }
+}</code></pre></div><div class="code-panel"><div class="code-bar"><span>成功 data · 初始状态仅为形状示例</span></div><pre tabindex="0" aria-label="Payment 响应 data"><code data-copy>{
+  "paymentId": "acq_pay_0123456789abcdef0123456789abcdef",
+  "attemptId": "acq_pat_0123456789abcdef0123456789abcdef",
+  "status": "CREATED",
+  "amountMinor": 1000,
+  "currency": "USD",
+  "captureMode": "AUTOMATIC",
+  "paymentMethods": ["APPLE_PAY"],
+  "commandStatus": "PENDING",
+  "checkoutUrl": "/checkout/#EXAMPLE_CHECKOUT_TOKEN",
+  "merchantOrderId": "ORDER-20261017-001"
+}</code></pre></div></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="支付响应字段"><table><thead><tr><th>data 字段</th><th>类型 / 含义</th></tr></thead><tbody><tr><td><code>paymentId</code></td><td>string；<code>acq_pay_</code> 加 32 位小写 hex。</td></tr><tr><td><code>attemptId</code></td><td>string，可省略；当前支付尝试 ID。</td></tr><tr><td><code>status</code></td><td>string；Payment 状态。</td></tr><tr><td><code>amountMinor / currency</code></td><td>integer / string；支付金额与币种。</td></tr><tr><td><code>captureMode / paymentMethods</code></td><td>string / string[]；扣款模式与支付方式数组。</td></tr><tr><td><code>commandStatus</code></td><td>string，可省略；命令状态，不能作为履约依据。</td></tr><tr><td><code>checkoutUrl</code></td><td>string，可省略；相对地址 <code>/checkout/#&lt;token&gt;</code>，以收银台 origin 解析。</td></tr><tr><td><code>merchantOrderId</code></td><td>string；原订单号。该响应没有 createdAt / updatedAt。</td></tr></tbody></table></div>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payments/{paymentId}</code><span class="scope">payments:read</span></div><p>返回同一 Payment data 结构；核对原订单、金额、币种和最终状态。</p>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payments</code><span class="scope">payments:read</span></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="支付列表查询"><table><thead><tr><th>可选 Query</th><th>约束</th></tr></thead><tbody><tr><td><code>cursor</code></td><td>原样续传 nextCursor。</td></tr><tr><td><code>limit</code></td><td>默认 50，1–100。</td></tr><tr><td><code>status</code></td><td>Payment 状态精确筛选。</td></tr><tr><td><code>merchantOrderId</code></td><td>订单号精确筛选，≤128 字符。</td></tr></tbody></table></div>
+<div class="code-panel"><div class="code-bar"><span>列表成功 data</span></div><pre tabindex="0" aria-label="支付列表响应"><code data-copy>{ "payments": [], "nextCursor": null }</code></pre></div>
+<h3>状态与履约</h3><div class="status-list"><code>CREATED</code><code>REQUIRES_ACTION</code><code>PROCESSING</code><code>AUTHORIZED</code><code>PARTIALLY_CAPTURED</code><code class="success">CAPTURED</code><code>FAILED</code><code>CANCELED</code><code>EXPIRED</code></div><p>确认 <code>CAPTURED</code> 且订单、金额、币种一致后才履约；AUTHORIZED、PROCESSING、PARTIALLY_CAPTURED 不等于全额收款。</p>
+<h3>Capture / Void · 当前不可用</h3><div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/payments/{paymentId}/capture</code><span class="scope">payments:write · Idempotency-Key</span></div><div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/payments/{paymentId}/void</code><span class="scope">payments:write · Idempotency-Key</span></div><p>body 仅允许省略或 <code>{}</code>，不接收 amount 参数。合法请求当前仍返回 <code>HTTP 503 / code "50260"</code>，请勿通过重试尝试开启能力。</p>
+</section>
+
+<section class="doc-section" id="hosted" data-search>
+<div class="section-heading"><p class="eyebrow">HOSTED CHECKOUT</p><h2 tabindex="-1">托管收银台</h2><p class="section-intro">商户接入平台收银台地址即可。买家页面不接收 AccessKeyId、SecretKey 或商户 HMAC 签名材料。</p></div>
+<div class="example-grid"><div class="code-panel"><div class="code-bar"><span>现代 Payment · token 位于 fragment</span></div><pre tabindex="0" aria-label="现代收银台跳转"><code data-copy>const checkoutHref = new URL(
+  payment.checkoutUrl,
+  "https://checkout.saferoute.global"
+).href;
+// https://checkout.saferoute.global/checkout/#&lt;token&gt;</code></pre></div><div class="code-panel"><div class="code-bar"><span>兼容 Session · sessionId</span></div><pre tabindex="0" aria-label="兼容 Session 收银台跳转"><code data-copy>const href = new URL(
+  "/checkout/", "https://checkout.saferoute.global"
+);
+href.searchParams.set("sessionId", session.id);
+// /checkout/?sessionId=&lt;id&gt;</code></pre></div></div>
+<p>单笔 token 只交给对应买家，不写日志、统计或浏览器存储。兼容 Session 响应的 <code>url</code> 由商户服务端保留，买家使用上方平台 Session 地址。</p>
+<h3>旧托管交接读取 · 兼容保留</h3><div class="endpoint"><span class="method get">GET</span><code>/open/v1/hosted-checkout/{token}</code><span class="scope">checkout:read</span></div><p>这是需要商户 HMAC 的旧读取接口，不是现代买家页面。token 格式为 <code>acq_chk_</code> 加 32 位小写 hex；成功 data 为 <code>{paymentId, attemptId, status, expiresAt}</code>，不回显 token，不改变 Payment 状态。新接入使用 Payment.checkoutUrl。</p>
+<div class="callout"><strong>两种入口分别使用</strong>现代 fragment token 与兼容 sessionId 不互换。Session ID、Payment ID、Payment Intent ID 也不能相互替代。</div>
+</section>
+
+<section class="doc-section" id="refunds" data-search>
+<div class="section-heading"><p class="eyebrow">REFUNDS</p><h2 tabindex="-1">退款 Refund</h2><p class="section-intro">对已成功扣款且仍可退的本金发起退款。当前仅有 TEST 能力；LIVE 退款写入未开放。</p></div>
+<div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/payments/{paymentId}/refunds</code><span class="scope">payments:write · Idempotency-Key</span></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="退款请求"><table><thead><tr><th>字段</th><th>类型 / 必填</th><th>约束</th></tr></thead><tbody><tr><td><code>amountMinor</code></td><td>integer · <span class="required">必填</span></td><td>正整数美分，不超过剩余可退本金。</td></tr><tr><td><code>reason</code></td><td>string · 可选</td><td>≤512 字符。</td></tr></tbody></table></div><p>需要真实存在且状态允许的支付、有效能力与足额资金；资金、已有进行中退款或金额/状态冲突可能返回 409。未知结果保留原幂等键，先确认原退款。</p>
+<div class="example-grid"><div class="code-panel"><div class="code-bar"><span>退款请求</span></div><pre tabindex="0" aria-label="退款请求示例"><code data-copy>{ "amountMinor": 250, "reason": "customer_request" }</code></pre></div><div class="code-panel"><div class="code-bar"><span>成功 data · 形状示例</span></div><pre tabindex="0" aria-label="退款响应示例"><code data-copy>{
+  "refundId": "example-refund-id",
+  "paymentId": "acq_pay_0123456789abcdef0123456789abcdef",
+  "status": "CREATED",
+  "principalMinor": 250,
+  "originalFeeReturnMinor": 0,
+  "operationFeeMinor": 0,
+  "netMerchantImpactMinor": 250,
+  "currency": "USD",
+  "reason": "customer_request"
+}</code></pre></div></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="退款响应字段"><table><thead><tr><th>data 字段</th><th>类型 / 含义</th></tr></thead><tbody><tr><td><code>refundId / paymentId / status</code></td><td>string；退款、所属支付与状态。</td></tr><tr><td><code>principalMinor</code></td><td>integer；退还本金。</td></tr><tr><td><code>originalFeeReturnMinor / operationFeeMinor</code></td><td>integer；退回原费用 / 本次操作费用。</td></tr><tr><td><code>netMerchantImpactMinor</code></td><td>integer；<code>principalMinor + operationFeeMinor - originalFeeReturnMinor</code>。</td></tr><tr><td><code>currency</code></td><td>string；USD。</td></tr><tr><td><code>reason / failureCode</code></td><td>可空 string，空值可能省略。</td></tr><tr><td><code>sourceOccurredAt / completedAt / createdAt / updatedAt</code></td><td>可空 ISO 8601 时间，空值可能省略。</td></tr></tbody></table></div>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payments/{paymentId}/refunds</code><span class="scope">payments:read</span></div><p>可选 cursor、limit（默认 50，1–100）。data 为 <code>{refunds: [Refund], nextCursor}</code>。</p><div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payments/{paymentId}/refunds/{refundId}</code><span class="scope">payments:read</span></div><p>返回上述 Refund data；退款不属于路径中的支付时返回 404。</p><div class="status-list"><code>CREATED</code><code>REQUIRES_FUNDING</code><code>READY</code><code>PROCESSING</code><code>SUCCEEDED</code><code>FAILED</code><code>CANCELED</code></div>
+</section>
+
+<section class="doc-section" id="disputes" data-search>
+<div class="section-heading"><p class="eyebrow">DISPUTES</p><h2 tabindex="-1">争议 Dispute</h2><p class="section-intro">查询争议与应答期限，接受争议或提交获准的证据引用。当前争议写入仅有 TEST 能力，LIVE 未开放。</p></div>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/disputes</code><span class="scope">payments:read</span></div><p>可选 status、cursor、limit（默认 50，1–100）。data 为 <code>{disputes: [Dispute], nextCursor}</code>。</p><div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/disputes/{disputeId}</code><span class="scope">payments:read</span></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="争议响应字段"><table><thead><tr><th>data 字段</th><th>类型 / 含义</th></tr></thead><tbody><tr><td><code>disputeId / paymentId / captureId</code></td><td>string；争议、支付与扣款资源 ID。</td></tr><tr><td><code>status / fundsStatus</code></td><td>string；业务状态 / 资金状态。</td></tr><tr><td><code>reasonCode / stage / liableParty / result</code></td><td>string；原因、阶段、责任方与结果。</td></tr><tr><td><code>amountMinor / feeMinor</code></td><td>integer；争议金额 / 费用，美分。</td></tr><tr><td><code>reserveHeldMinor / frozenHeldMinor / negativeMinor</code></td><td>integer；保证金、冻结与负余额占用，美分。</td></tr><tr><td><code>currency</code></td><td>string；USD。</td></tr><tr><td><code>respondBy / sourceOccurredAt / completedAt</code></td><td>ISO 8601 时间；可空字段可能省略。</td></tr></tbody></table></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="争议状态"><table><thead><tr><th>字段</th><th>取值</th></tr></thead><tbody><tr><td>status</td><td>OPEN / ACTION_REQUIRED / EVIDENCE_SUBMITTED / UNDER_REVIEW / WON / LOST / ACCEPTED / CANCELED</td></tr><tr><td>fundsStatus</td><td>UNHELD / HELD / DEBITED / RELEASED / REVERSED</td></tr><tr><td>stage</td><td>INQUIRY / CHARGEBACK / PRE_ARBITRATION / ARBITRATION</td></tr><tr><td>liableParty</td><td>UNDETERMINED / MERCHANT / CHANNEL</td></tr><tr><td>result</td><td>PENDING / WON / LOST / ACCEPTED / CANCELED</td></tr></tbody></table></div>
+<div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/disputes/{disputeId}/accept</code><span class="scope">payments:write · Idempotency-Key</span></div><p>无请求体；成功 data 返回上述 Dispute 结构。</p><div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/disputes/{disputeId}/evidence</code><span class="scope">payments:write · Idempotency-Key</span></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="证据请求"><table><thead><tr><th>必填字段</th><th>约束</th></tr></thead><tbody><tr><td><code>evidenceType</code></td><td>非空可打印 ASCII，不含空格，≤64 字符。</td></tr><tr><td><code>secureReference</code></td><td><code>[A-Za-z0-9][A-Za-z0-9._:-]{0,254}</code>，来自获准证据存储流程。</td></tr><tr><td><code>evidenceHash</code></td><td>内容的 64 位十六进制 SHA-256。</td></tr></tbody></table></div>
+<div class="example-grid"><div class="code-panel"><div class="code-bar"><span>证据引用 · 格式示例</span></div><pre tabindex="0" aria-label="证据请求示例"><code data-copy>{
+  "evidenceType": "RECEIPT",
+  "secureReference": "approved-evidence:example-001",
+  "evidenceHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+}</code></pre></div><div class="code-panel"><div class="code-bar"><span>成功 data · 形状示例</span></div><pre tabindex="0" aria-label="证据响应示例"><code data-copy>{
+  "evidenceId": "example-evidence-id",
+  "disputeId": "example-dispute-id",
+  "evidenceType": "RECEIPT",
+  "disputeStatus": "EVIDENCE_SUBMITTED",
+  "submittedAt": "2026-10-17T04:00:00Z"
+}</code></pre></div></div><p class="muted">该接口不上传文件，不接收任意公网 URL、磁盘路径或文件内容。响应不返回存储引用或哈希。示例引用需替换为真实获准上传流程授予的引用。</p>
+</section>
+
+<section class="doc-section" id="balance" data-search>
+<div class="section-heading"><p class="eyebrow">BALANCE</p><h2 tabindex="-1">余额 Balance</h2><p class="section-intro">读取当前收单凭据对应范围的 USD 余额。全部金额字段都是整数美分。</p></div>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/balance</code><span class="scope">balance:read</span></div><p>无 query、无 body，可作为首次签名联调的只读请求。</p>
+<div class="example-grid"><div class="table-wrap" tabindex="0" role="region" aria-label="余额字段"><table><thead><tr><th>data 字段</th><th>含义</th></tr></thead><tbody><tr><td><code>currency</code></td><td>币种 USD。</td></tr><tr><td><code>pendingMinor</code></td><td>待结算余额。</td></tr><tr><td><code>availableMinor</code></td><td>可用余额。</td></tr><tr><td><code>frozenMinor</code></td><td>冻结余额。</td></tr><tr><td><code>reserveMinor</code></td><td>保证金余额。</td></tr><tr><td><code>negativeMinor</code></td><td>负余额金额。</td></tr></tbody></table></div><div class="code-panel"><div class="code-bar"><span>成功 data · 形状示例</span></div><pre tabindex="0" aria-label="余额响应"><code data-copy>{
+  "currency": "USD",
+  "pendingMinor": 120000,
+  "availableMinor": 890000,
+  "frozenMinor": 0,
+  "reserveMinor": 35000,
+  "negativeMinor": 0
+}</code></pre></div></div>
+</section>
+
+<section class="doc-section" id="payouts" data-search>
+<div class="section-heading"><p class="eyebrow">PAYOUTS</p><h2 tabindex="-1">提现 Payout</h2><p class="section-intro">公开 API 可读取已有提现详情；创建、批准与拒绝写入当前均不可用。</p></div>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payouts/{payoutId}</code><span class="scope">payments:read</span></div><p>没有 <code>GET /payouts</code> 集合列表接口。</p>
+<div class="example-grid"><div class="table-wrap" tabindex="0" role="region" aria-label="提现字段"><table><thead><tr><th>data 字段</th><th>约定</th></tr></thead><tbody><tr><td><code>payoutId / status</code></td><td>string；提现 ID / 状态。</td></tr><tr><td><code>result</code></td><td>可空；SUCCEEDED / FAILED / RETURNED / UNKNOWN_OUTCOME。</td></tr><tr><td><code>principalMinor / feeMinor / totalDebitMinor</code></td><td>integer；本金、手续费与总扣款，美分。</td></tr><tr><td><code>currency</code></td><td>string；USD。</td></tr></tbody></table></div><div class="code-panel"><div class="code-bar"><span>详情 data · 形状示例</span></div><pre tabindex="0" aria-label="提现响应"><code data-copy>{
+  "payoutId": "example-payout-id",
+  "status": "PROCESSING",
+  "result": null,
+  "principalMinor": 10000,
+  "feeMinor": 100,
+  "totalDebitMinor": 10100,
+  "currency": "USD"
+}</code></pre></div></div><p>status：<code>CREATED / REVIEW_REQUIRED / READY / PROCESSING / SUCCEEDED / FAILED / CANCELED / RETURNED</code>。</p>
+<h3>保留写入路由 · 当前拒绝受理</h3><div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/payouts</code><span class="scope">payments:write · Idempotency-Key</span></div><div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/payouts/{payoutId}/approve</code><span class="scope">payments:write · Idempotency-Key</span></div><div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/payouts/{payoutId}/reject</code><span class="scope">payments:write · Idempotency-Key</span></div>
+<p>兼容创建 body 要求 <code>bankAccountId</code> 非空、<code>principalMinor</code> 正整数、<code>riskResult</code> 与 <code>mfaEvidenceReference</code> 非空；批准/拒绝要求 <code>X-Review-Actor</code> 非空且不等于 <code>OPEN_API</code>。</p><div class="callout warn"><strong>TEST / LIVE 均不可通过上述写入提现</strong>正常认证、权限和参数校验后，合法输入仍返回 <code>HTTP 400 / code "40001"</code>。MFA 引用或 review actor 字符串不构成可信验证，请与平台确认正式提现流程。</div>
+</section>
+
+<section class="doc-section" id="checkout" data-search>
+<div class="section-heading"><p class="eyebrow">COMPATIBILITY API</p><h2 tabindex="-1">Checkout Session</h2><p class="section-intro">已有 Session 集成的兼容接口，使用 amount、clientOrderId 与小写状态；不要与平台 Payment 混用字段和状态。</p></div>
+<div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/checkout-sessions</code><span class="scope">payments:write · Idempotency-Key</span></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Session 请求"><table><thead><tr><th>字段</th><th>类型 / 必填</th><th>约束</th></tr></thead><tbody><tr><td><code>amount</code></td><td>integer · <span class="required">必填</span></td><td>1–99,999,999，美分。</td></tr><tr><td><code>currency</code></td><td>string · <span class="required">必填</span></td><td><code>usd</code>。</td></tr><tr><td><code>clientOrderId</code></td><td>string · 可选</td><td>去首尾空白后 ≤64 字符；空串视为无。</td></tr><tr><td><code>customMetadata</code></td><td>object · 可选</td><td>扁平标量值；禁止大小写无关的 vcc 前缀 key；含平台保留字段后序列化 ≤2048 UTF-8 字节。</td></tr><tr><td><code>config</code></td><td>object · 可选</td><td>只传平台确认支持的配置；示例省略。</td></tr><tr><td><code>expiresAt</code></td><td>ISO 8601 · 可选</td><td>距服务端当前时间至少 30 分钟、最多 7 天。示例省略以避免固定日期过期。</td></tr></tbody></table></div>
+<p>未知顶层字段拒绝；不使用 Payment 的 <code>amountMinor / merchantOrderId / paymentMethod</code>。</p>
+<div class="example-grid"><div class="code-panel"><div class="code-bar"><span>兼容创建请求</span></div><pre tabindex="0" aria-label="Session 请求示例"><code data-copy>{
+  "amount": 1000,
+  "currency": "usd",
+  "clientOrderId": "ORDER-LEGACY-001",
+  "customMetadata": { "item": "Example order" }
+}</code></pre></div><div class="code-panel"><div class="code-bar"><span>详情 data · 可空字段保留 null</span></div><pre tabindex="0" aria-label="Session 响应示例"><code data-copy>{
+  "id": "example-session-id",
+  "url": "https://example.invalid/server-only-handoff",
+  "status": "open",
+  "amount": 1000,
+  "currency": "usd",
+  "clientOrderId": "ORDER-LEGACY-001",
+  "merchantCode": "EXAMPLE_MERCHANT",
+  "createdAt": "2026-10-17T04:00:00Z",
+  "expiresAt": "2026-10-17T05:00:00Z",
+  "paymentIntentId": null,
+  "customMetadata": { "item": "Example order" },
+  "config": null
+}</code></pre></div></div>
+<p>基础响应字段为 <code>id / url / status / amount / currency / clientOrderId / merchantCode / createdAt / expiresAt / paymentIntentId</code>；详情可含 customMetadata / config，列表不含这两项详情字段。url 是服务端兼容字段；买家使用 <code>https://checkout.saferoute.global/checkout/?sessionId=&lt;id&gt;</code>。</p>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/checkout-sessions</code><span class="scope">checkout:read</span></div><p>可选 query：<code>cursor</code> 原样续传；<code>limit</code> 默认 20、1–100（越界钳制）；<code>status</code>、<code>clientOrderId</code> 筛选。</p><div class="code-panel"><div class="code-bar"><span>列表成功 data</span></div><pre tabindex="0" aria-label="Session 列表响应"><code data-copy>{ "items": [], "nextCursor": null, "count": 0 }</code></pre></div>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/checkout-sessions/{id}</code><span class="scope">checkout:read</span></div><p>返回上述详情；非终态查询可尝试刷新，无法刷新时可能附 <code>freshness: "CACHED", nonRealtime: true</code>。列表为快照，不承诺强实时。</p>
+<div class="endpoint"><span class="method patch">PATCH</span><code>/open/v1/acquiring/checkout-sessions/{id}</code><span class="scope">payments:write · Idempotency-Key</span></div><p>仅允许 amount 与 expiresAt，至少一项，约束与创建相同。仅 open 可更新，否则 <code>409 / 40916</code>；示例：<code>{"amount":1200}</code>。</p><div class="callout"><strong>Session 与 Intent 分别确认</strong>常见 Session 状态为 <code>open / complete / expired / canceled</code>；没有通用 failed Session 终态承诺。Session complete 不等于平台 Payment 的 CAPTURED。兼容接入结合服务端查询与已验签完成通知确认原订单，必要时读取返回的 paymentIntentId。</div>
+</section>
+
+<section class="doc-section" id="intents" data-search>
+<div class="section-heading"><p class="eyebrow">COMPATIBILITY API</p><h2 tabindex="-1">Payment Intent</h2><p class="section-intro">只读兼容接口。新接入请优先使用平台 Payment；已有 Session 集成先取得 Session.paymentIntentId，再读取该 Intent。</p></div>
+<p>没有创建、确认或退款 Intent 的公开路由。不要将 Session ID 当作标准 Intent ID；尚未形成可读 Intent 时可能返回 404。</p>
+<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payment-intents</code><span class="scope">payments:read</span></div><p>可选 query：<code>cursor</code> 原样续传；<code>limit</code> 默认 20、1–100（越界钳制）；<code>status</code>、<code>checkoutSessionId</code> 筛选。data 为 <code>{items: [Intent], nextCursor, count}</code>。</p><div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payment-intents/{id}</code><span class="scope">payments:read</span></div>
+<div class="code-panel"><div class="code-bar"><span>详情 data · 形状示例</span></div><pre tabindex="0" aria-label="Intent 响应"><code data-copy>{
+  "id": "example-intent-id",
+  "status": "succeeded",
+  "amount": 1000,
+  "currency": "usd",
+  "checkoutSessionId": "example-session-id",
+  "clientOrderId": "ORDER-LEGACY-001",
+  "createdAt": "2026-10-17T04:00:00Z",
+  "updatedAt": "2026-10-17T04:01:00Z"
+}</code></pre></div><p>详情含上述八字段；降级快照可另有 <code>freshness: "CACHED", nonRealtime: true</code>。常见小写状态为 pending / processing / succeeded / failed / canceled，也可能保留其他渠道状态，不应假定列举穷尽。</p><div class="callout"><strong>兼容查询用于已有集成</strong>多 MID 或多环境的新集成请使用平台 Payment，开通前与平台确认兼容查询的适用范围。</div>
+</section>
+<section class="doc-section" id="webhooks" data-search>
+<div class="section-heading"><p class="eyebrow">EVENT DELIVERY</p><h2 tabindex="-1">Webhook 通知</h2><p class="section-intro">配置 HTTPS 接收地址、订阅与独立 Webhook Secret。通知 Secret 与 API Secret 分别管理；端点按商户、MID 与环境配置。</p></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="通知请求头"><table><thead><tr><th>投递请求头</th><th>约定</th></tr></thead><tbody><tr><td><code>Content-Type</code></td><td><code>application/json; charset=utf-8</code></td></tr><tr><td><code>X-Vcc-Event-Id</code></td><td>稳定事件 ID，必须与 body.id 一致。</td></tr><tr><td><code>X-Vcc-Webhook-Key-Id</code></td><td>选择当前或轮换宽限期内密钥；旧密钥宽限默认 48 小时，以接入配置为准。</td></tr><tr><td><code>X-Vcc-Timestamp</code></td><td>Unix <b>毫秒</b>。</td></tr><tr><td><code>X-Vcc-Signature</code></td><td><code>t=&lt;timestampMillis&gt;,v1=&lt;64位小写hex&gt;</code>；t 须等于上方时间头。</td></tr></tbody></table></div>
+<h3>先验签，再解析</h3><p>签名消息为 <code>UTF8(timestampMillis + "\n") || exactRawBodyBytes</code>，使用通知 Secret 的 UTF-8 字节做 HMAC-SHA256 key。严格解析签名格式，检查时间窗并恒时比较。本契约不使用 nonce；验签前不得 JSON.parse 后重新 stringify。</p>
+<div class="code-panel"><div class="code-bar"><span>Node.js · 原始 Buffer 验签</span></div><pre tabindex="0" aria-label="Webhook 验签代码"><code id="webhook-example" data-copy>import crypto from "node:crypto";
+
+// rawBody 是 HTTP 原始 Buffer，在 JSON 解析中间件之前获取。
+// secret 按 X-Vcc-Webhook-Key-Id 从服务端配置的密钥集合选择。
+export function verifyWebhook(rawBody, secret, timestamp, signature, now = Date.now()) {
+  if (!Buffer.isBuffer(rawBody) || typeof timestamp !== "string" ||
+      typeof signature !== "string" || typeof secret !== "string" || !secret) return false;
+  const parts = /^t=([0-9]+),v1=([0-9a-f]{64})$/.exec(signature);
+  if (!parts || parts[1] !== timestamp || !/^[0-9]+$/.test(timestamp)) return false;
+  const millis = Number(timestamp);
+  // 5 分钟是本接收端建议窗口，按双方接入约定设置。
+  if (!Number.isSafeInteger(millis) || !Number.isFinite(now) ||
+      Math.abs(now - millis) &gt; 5 * 60 * 1000) return false;
+  const expected = crypto.createHmac("sha256", Buffer.from(secret, "utf8"))
+    .update(Buffer.from(timestamp + "\n", "utf8"))
+    .update(rawBody).digest();
+  return crypto.timingSafeEqual(expected, Buffer.from(parts[2], "hex"));
+}
+// 通过后再 JSON.parse，检查 id 与 X-Vcc-Event-Id 一致、version、type、
+// environment、MID 和订单归属；幂等持久化成功后快速返回 204。</code></pre></div>
+<h3>Schema v1 事件信封</h3><p>事件使用 <code>id / type / version / occurredAt / traceId / merchantId / midPublicId / environment / aggregateType / aggregateId / data</code>，不包在 API 的 code/data 信封内，字段不是 eventId / eventType。</p>
+<div class="code-panel"><div class="code-bar"><span>payment 事件 · CAPTURE 资源成功示例</span></div><pre tabindex="0" aria-label="Webhook 事件信封"><code data-copy>{
+  "id": "example-event-001",
+  "type": "merchant.webhook.acquiring.payment",
+  "version": 1,
+  "occurredAt": "2026-10-17T04:00:00Z",
+  "traceId": "example-trace-id",
+  "merchantId": 10001,
+  "midPublicId": "acq_mid_0123456789abcdef0123456789abcdef",
+  "environment": "TEST",
+  "aggregateType": "payment",
+  "aggregateId": "acq_pay_0123456789abcdef0123456789abcdef",
+  "data": {
+    "commandFactId": "example-command-001",
+    "commandType": "TRANSITION_CAPTURE",
+    "paymentId": "acq_pay_0123456789abcdef0123456789abcdef",
+    "resourceType": "CAPTURE",
+    "resourceId": "acq_cap_0123456789abcdef0123456789abcdef",
+    "status": "SUCCEEDED",
+    "amountMinor": 1000,
+    "authorizedAmountMinor": 1000,
+    "capturedAmountMinor": 1000,
+    "currency": "USD"
+  }
+}</code></pre></div>
+<div class="callout warn"><strong>payment 事件的 status 不一定是 Payment.status</strong>示例 <code>SUCCEEDED</code> 属于 <code>resourceType=CAPTURE</code>，不能直接据此发货。验签并核对归属后，仍需签名查询原 Payment，核对订单、金额、币种且要求 <code>status=CAPTURED</code>。</div>
+<h3>事件类型与 data</h3><p class="muted">下表类型统一以 <code>merchant.webhook.acquiring.</code> 开头；按 type 与 version 解析，不为未知类型推断支付成功。</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Webhook 事件类型"><table><thead><tr><th>类型后缀</th><th>data 字段</th></tr></thead><tbody>
+<tr><td><code>payment</code></td><td>commandFactId、commandType、paymentId、resourceType、resourceId、status、amountMinor、authorizedAmountMinor、capturedAmountMinor、currency</td></tr>
+<tr><td><code>refund</code></td><td>refundId、paymentId、status、amountMinor、currency</td></tr>
+<tr><td><code>dispute</code></td><td>disputeId、paymentId、status、amountMinor、currency</td></tr>
+<tr><td><code>balance</code></td><td>reserveLotId、reserveEventId、reason、pendingDeltaMinor、reserveDeltaMinor、availableDeltaMinor、negativeDeltaMinor、currency</td></tr>
+<tr><td><code>reserve</code></td><td>reserveLotId、reserveEventId、eventType、totalMinor、remainingMinor、encumberedMinor、releasedMinor、releaseAt、currency</td></tr>
+<tr><td><code>settlement</code></td><td>settlementId、status、grossAmountMinor、feeAmountMinor、netAmountMinor、currency</td></tr>
+<tr><td><code>checkout_session.completed</code></td><td>checkoutSessionId、status=complete、amount、currency；可选 clientOrderId、paymentIntentId、customMetadata 与兼容事件参考字段</td></tr>
+<tr><td><code>payment_intent.succeeded</code><br><code>payment_intent.failed</code></td><td>paymentIntentId、checkoutSessionId、status、amount、currency；可选 clientOrderId、updatedAt</td></tr>
+</tbody></table></div>
+<h3>接收、去重与重投</h3><ol><li>验签并检查事件 ID、版本、环境、MID 与订单归属，以 <code>event.id</code> 幂等持久化。</li><li>持久化成功后快速返回任意 <b>2xx</b>（建议 <code>204</code> 空 body）；重复已接收事件仍返回 2xx，耗时履约异步执行。</li><li>容忍重复、延迟与非按序抵达。重投复用同一事件 ID / body，投递时间戳和签名可变化。</li></ol>
+<div class="table-wrap" tabindex="0" role="region" aria-label="通知投递结果"><table><thead><tr><th>接收结果</th><th>投递行为</th></tr></thead><tbody><tr><td>2xx</td><td>已确认接收。</td></tr><tr><td>408 / 429 / 5xx</td><td>可按退避重试；默认首投加 3 次重试，配置可变。</td></tr><tr><td>其他非 2xx HTTP</td><td>不自动重试，修复接收端后联系平台核查。</td></tr><tr><td>超时 / 网络结果未知</td><td>不盲目自动重复；查询原支付，必要时联系平台核查通知。</td></tr></tbody></table></div>
+</section>
+
+<section class="doc-section" id="errors" data-search>
+<div class="section-heading"><p class="eyebrow">ERROR HANDLING</p><h2 tabindex="-1">错误处理与重试</h2><p class="section-intro">保留 traceId、资源 ID、HTTP 状态和字符串业务码以便排查；不记录凭据、签名、checkout token 或完整敏感 body。</p></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="公共错误码"><table><thead><tr><th>HTTP</th><th>code</th><th>含义与处理</th></tr></thead><tbody>
+<tr><td>400</td><td><code>40001</code></td><td>参数/状态验证失败或尚未开放的提现写入；修正参数或确认能力。</td></tr><tr><td>400</td><td><code>40003</code></td><td>缺少 Idempotency-Key；补原业务动作的键。</td></tr><tr><td>400</td><td><code>40012 / 40013</code></td><td>timestamp / nonce 格式错误；API 时间使用 Unix 秒。</td></tr><tr><td>400</td><td><code>40060</code></td><td>渠道拒绝请求；检查参数与可用能力。</td></tr><tr><td>401</td><td><code>40110</code></td><td>凭据无效；检查凭据状态与绑定信息。</td></tr><tr><td>401</td><td><code>40111</code></td><td>签名错误；核对原始 body、路径、query、Secret 和 LF。</td></tr><tr><td>401</td><td><code>40112</code></td><td>时钟偏差；同步时钟后重新签名。</td></tr><tr><td>401</td><td><code>40114</code></td><td>nonce 重复；换新 nonce，保留原业务幂等键。</td></tr><tr><td>403</td><td><code>40314 / 40315</code></td><td>凭据类型/scope 不符，或能力关闭/策略拒绝；确认授权与资格。</td></tr><tr><td>404</td><td><code>40401</code></td><td>资源不存在或不在当前可见范围；核对 ID 与集成流程。</td></tr><tr><td>409</td><td><code>40901</code></td><td>业务状态冲突；重新查询原资源。</td></tr><tr><td>409</td><td><code>40904</code></td><td>同键异参或仍处理中；核对原请求与原资源，不直接换键。</td></tr><tr><td>409</td><td><code>40916</code></td><td>Session 不可修改；查询最新状态。</td></tr><tr><td>429</td><td><code>42902</code></td><td>请求频繁；按响应等待后退避。</td></tr><tr><td>502 / 503</td><td><code>50260</code></td><td>渠道故障或操作不支持；Capture / Void 当前为 503，重试不能开启。</td></tr><tr><td>500 / 503</td><td><code>50001</code></td><td>服务暂不可用；确认原订单并保留原幂等键。</td></tr>
+</tbody></table></div><p>只对可恢复错误做有上限的指数退避并加抖动。确定的参数、权限、未开放能力或同键异参错误先修正原因；未知支付结果先查询。HTTP 状态与业务码不是同一值，例如业务码 50260 可对应 HTTP 503。</p>
+</section>
+
+<section class="doc-section" id="checklist" data-search>
+<div class="section-heading"><p class="eyebrow">READY TO INTEGRATE</p><h2 tabindex="-1">接入检查清单</h2><p class="section-intro">在申请生产能力前，用已开通的 TEST 范围完成签名、业务状态和异常场景联调。</p></div>
+<ul class="checklist"><li>凭据类型、商户、MID、环境与操作 scope 已确认。</li><li>实际可用支付方式、策略和真实钱包资格已确认。</li><li>签名覆盖重复 query、空格、中文、空 body 与 JSON。</li><li>每次 HTTP 新 nonce；重试保持原键与原正文。</li><li>金额使用整数美分，订单与资源 ID 已保存。</li><li>checkoutUrl 用收银台域名解析并仅交给对应买家。</li><li>履约前查原 Payment，核对订单/金额/币种与 CAPTURED。</li><li>超时、5xx、409 处理中均确认原交易，避免重复支付。</li><li>Webhook 原始 Buffer 验签，检查 ID、版本与归属。</li><li>持久化去重，重复事件返回 2xx，并容忍乱序。</li><li>日志不含凭据、签名、checkout token 或敏感 body。</li><li>LIVE 凭据与能力单独申请，确认受理范围后再接入。</li></ul>
+</section>
+<footer class="footer"><span>VCC 收单开放平台 · Open API v1 · 更新于 2026-10-17</span><a href="#hero">返回顶部 ↑</a></footer>
+</main>
+</div>
+<p class="copy-status" id="copyStatus" role="status" aria-live="polite" aria-atomic="true"></p>
+<script>
+(() => {
+  document.documentElement.classList.add('js');
+  const sidebar = document.getElementById('sidebar');
+  const menu = document.getElementById('menuToggle');
+  const close = document.getElementById('drawerClose');
+  const backdrop = document.getElementById('backdrop');
+  const main = document.getElementById('main');
+  const search = document.getElementById('search');
+  const clear = document.getElementById('searchClear');
+  const sections = [...document.querySelectorAll('[data-search]')];
+  const links = [...document.querySelectorAll('.nav a')];
+  const empty = document.getElementById('noResults');
+  const hero = document.getElementById('hero');
+  const searchStatus = document.getElementById('searchStatus');
+  const mobile = window.matchMedia('(max-width: 880px)');
+  const searchText = new Map(sections.map(s => [s.id, s.textContent.toLocaleLowerCase('zh-CN')]));
+  let open = false, copyTimer;
+  function setMenu(next, restoreFocus = true) {
+    open = next && mobile.matches;
+    sidebar.classList.toggle('open', open);
+    backdrop.classList.toggle('open', open);
+    document.body.classList.toggle('menu-open', open);
+    menu.setAttribute('aria-expanded', String(open));
+    main.inert = open;
+    sidebar.inert = mobile.matches && !open;
+    if (open) search.focus();
+    else if (restoreFocus && mobile.matches) menu.focus();
+  }
+  menu.addEventListener('click', () => setMenu(!open));
+  close.addEventListener('click', () => setMenu(false));
+  backdrop.addEventListener('click', () => setMenu(false));
+  mobile.addEventListener('change', () => setMenu(false, false));
+  setMenu(false, false);
+  function setActive(id) {
+    links.forEach(a => {
+      if (a.hash === '#' + id) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
+  }
+  function filter() {
+    const q = search.value.trim().toLocaleLowerCase('zh-CN');
+    let count = 0;
+    sections.forEach(s => {
+      const match = !q || searchText.get(s.id).includes(q);
+      s.hidden = !match;
+      if (match) count++;
+    });
+    links.forEach(a => { a.hidden = document.getElementById(a.hash.slice(1)).hidden; });
+    document.querySelectorAll('.nav-block').forEach(group => {
+      group.hidden = ![...group.querySelectorAll('a')].some(a => !a.hidden);
+    });
+    hero.hidden = !!q;
+    empty.hidden = count > 0;
+    clear.hidden = !search.value;
+    searchStatus.textContent = q ? '找到 ' + count + ' 个相关章节' : '';
+    const first = sections.find(s => !s.hidden);
+    if (first) setActive(first.id);
+  }
+  function resetSearch() { search.value = ''; filter(); }
+  search.addEventListener('input', filter);
+  clear.addEventListener('click', () => { resetSearch(); search.focus(); });
+  document.getElementById('emptyClear').addEventListener('click', () => {
+    resetSearch();
+    if (mobile.matches) setMenu(true);
+    else search.focus();
+  });
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', () => {
+      const target = document.getElementById(a.hash.slice(1));
+      if (!target) return;
+      if (target.hidden) resetSearch();
+      if (open) setMenu(false, false);
+      if (target.matches('[data-search]')) {
+        setActive(target.id);
+        target.querySelector('h2').focus({ preventScroll: true });
+      }
+    });
+  });
+  function revealHash() {
+    const id = location.hash.slice(1), target = document.getElementById(id);
+    if (target?.hidden) resetSearch();
+    if (target?.matches('[data-search]')) setActive(id);
+  }
+  window.addEventListener('hashchange', revealHash);
+  revealHash();
+  if (!location.hash) setActive('overview');
+  const observer = new IntersectionObserver(entries => {
+    const visible = entries.filter(e => e.isIntersecting && !e.target.hidden)
+      .sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    if (visible.length) setActive(visible[0].target.id);
+  }, { rootMargin: '-80px 0px -55% 0px', threshold: 0 });
+  sections.forEach(s => observer.observe(s));
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && open) { event.preventDefault(); setMenu(false); return; }
+    if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey &&
+        !event.target.closest('input,textarea,select,[contenteditable="true"]')) {
+      event.preventDefault();
+      if (mobile.matches && !open) setMenu(true);
+      else search.focus();
+    }
+    if (event.key === 'Tab' && open) {
+      const items = [...sidebar.querySelectorAll('a,button,input')]
+        .filter(el => !el.hidden && el.offsetParent !== null);
+      const first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    }
+  });
+  async function copyText(value) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value); return true;
+      }
+    } catch (_) { /* file:// 或浏览器权限不可用时使用本地回退。 */ }
+    const previous = document.activeElement, field = document.createElement('textarea');
+    field.value = value; field.setAttribute('readonly', '');
+    field.setAttribute('aria-label', '复制代码');
+    field.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(field);
+    let copied = false;
+    try { field.select(); copied = document.execCommand('copy'); }
+    finally { field.remove(); previous?.focus({ preventScroll: true }); }
+    return copied;
+  }
+  document.querySelectorAll('code[data-copy]').forEach(code => {
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'copy-btn'; button.textContent = '复制';
+    const bar = code.closest('.code-panel').querySelector('.code-bar');
+    button.setAttribute('aria-label', '复制 ' + bar.querySelector('span').textContent);
+    bar.appendChild(button);
+    button.addEventListener('click', async () => {
+      let copied = false;
+      try { copied = await copyText(code.textContent); } catch (_) { copied = false; }
+      const status = document.getElementById('copyStatus');
+      status.textContent = copied ? '代码已复制' : '复制未完成，请选中代码后手动复制';
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(() => { status.textContent = ''; }, 3500);
+    });
+  });
+})();
+</script>
 </body>
 </html>
