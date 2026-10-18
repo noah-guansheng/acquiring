@@ -33,33 +33,33 @@
   <nav class="nav" aria-label="开发者文档章节">
     <div class="nav-block"><p class="nav-label">开始接入</p><a href="#overview"><span>平台概览</span></a><a href="#quickstart"><span>快速开始</span><small>START</small></a><a href="#auth"><span>鉴权与签名</span><small>HMAC</small></a><a href="#common"><span>通用约定与接口目录</span></a></div>
     <div class="nav-block"><p class="nav-label">支付与资金</p><a href="#payments"><span>支付 Payment</span></a><a href="#hosted"><span>托管收银台</span></a><a href="#refunds"><span>退款 Refund</span></a><a href="#disputes"><span>争议 Dispute</span></a><a href="#balance"><span>余额 Balance</span></a><a href="#payouts"><span>提现 Payout</span></a></div>
-    <div class="nav-block"><p class="nav-label">兼容接口</p><a href="#checkout"><span>Checkout Session</span></a><a href="#intents"><span>Payment Intent</span></a></div>
     <div class="nav-block"><p class="nav-label">消息与排错</p><a href="#webhooks"><span>Webhook 通知</span></a><a href="#errors"><span>错误处理</span></a><a href="#checklist"><span>接入检查清单</span></a></div>
   </nav>
-  <div class="side-foot"><strong>服务端签名 · 托管收银台</strong>协议 v1 / Webhook Schema v1<br>文档更新 2026-10-17</div>
+  <div class="side-foot"><strong>服务端签名 · 托管收银台</strong>协议 v1 / Webhook Schema v1<br>文档更新 2026-10-18</div>
 </aside>
 <div id="backdrop" class="backdrop" aria-hidden="true"></div>
 <main class="content" id="main" tabindex="-1">
 <div class="hero" id="hero">
   <div class="hero-top"><div><p class="eyebrow">VCC ACQUIRING / DEVELOPER PLATFORM</p><h1>从创建订单，<br><span>到确认收款。</span></h1><p class="lede">为你的业务接入收单。用一套服务端 API 连接订单、平台收银台与支付结果，让每一步都有可核对的状态。</p><div class="hero-actions"><a class="primary-link" href="#quickstart">开始接入 <span aria-hidden="true">→</span></a><a class="quiet-link" href="#common">查看接口目录</a></div></div><div class="api-address"><span class="label">API BASE URL</span><code>https://api.saferoute.global</code><p>JSON / HTTPS / HMAC-SHA256<br>环境与 MID 由凭据绑定，密钥仅用于服务端。</p><div class="tags"><span class="tag">OPEN API v1</span><span class="tag">USD · 整数美分</span><span class="tag">Webhook v1</span></div></div></div>
-  <div class="flow" aria-label="支付接入流程"><div class="flow-step"><span class="flow-num">01</span><strong>创建收银台订单</strong><code>POST /checkout-sessions</code><p>保存订单、幂等键与 Session ID</p></div><div class="flow-step"><span class="flow-num">02</span><strong>打开托管收银台</strong><code>checkout.saferoute.global</code><p>将订单地址交给对应买家</p></div><div class="flow-step"><span class="flow-num">03</span><strong>查询与通知确认</strong><code>Session → Payment Intent</code><p>核对订单、金额、币种后履约</p></div></div>
+  <div class="flow" aria-label="支付接入流程"><div class="flow-step"><span class="flow-num">01</span><strong>创建 Payment</strong><code>POST /payments · CARD · LIVE</code><p>保存原订单、幂等键与 Payment ID</p></div><div class="flow-step"><span class="flow-num">02</span><strong>打开平台收银台</strong><code>payment.checkoutUrl</code><p>保留返回路径与 fragment 令牌</p></div><div class="flow-step"><span class="flow-num">03</span><strong>服务端确认收款</strong><code>GET /payments/{paymentId}</code><p>CAPTURED 且订单、金额、币种一致</p></div></div>
 </div>
 <noscript><p class="callout">全部接口内容可直接阅读。搜索、复制和移动目录交互需要 JavaScript；也可使用浏览器“查找”。</p></noscript>
 <div class="no-results" id="noResults" hidden><h2>没有找到相关章节</h2><p>试试 payment、签名、退款、nonce 或错误码。</p><button class="text-button" id="emptyClear" type="button">清空搜索，显示全部文档</button></div>
 
 <section class="doc-section" id="overview" data-search>
-<div class="section-heading"><p class="eyebrow">GET STARTED</p><h2 tabindex="-1">接入前，先确认这几件事</h2><p class="section-intro">商户服务端创建与查询支付，买家在平台收银台完成操作；凭据、金额与最终支付结果都由服务端管理。</p></div>
-<div class="cards"><div class="card"><h3>凭据与环境</h3><p>申请生产 ACQUIRING 类型的 AccessKeyId、SecretKey 与 MerchantCode，确认绑定的商户、MID、LIVE 环境及操作 scope。</p><span class="detail">一组凭据 · 一个 MID · 一个环境</span></div><div class="card"><h3>订单与金额</h3><p>所有金额使用 USD 整数美分。保存商户订单号、支付资源 ID 与每个业务动作的幂等键。</p><span class="detail">USD 10.00 → 1000</span></div><div class="card"><h3>通知与确认</h3><p>准备 HTTPS Webhook 地址与独立通知密钥，验签、去重并查询原支付，再执行履约。</p><span class="detail">服务端核对原订单与支付结果</span></div></div>
-<div class="table-wrap" tabindex="0" role="region" aria-label="平台地址"><table><thead><tr><th>用途</th><th>地址 / 约定</th></tr></thead><tbody><tr><td>Open API</td><td><code>https://api.saferoute.global</code> · 前缀 <code>/open/v1/acquiring</code></td></tr><tr><td>商户门户</td><td><a href="https://pay.saferoute.global" target="_blank" rel="noopener noreferrer">pay.saferoute.global ↗</a></td></tr><tr><td>买家收银台</td><td><code>https://checkout.saferoute.global</code> · 使用订单对应地址</td></tr><tr><td>生产环境 LIVE</td><td>由正式凭据绑定确定；请求不能改选商户、MID 或环境。域名本身不授予权限或受理能力。</td></tr></tbody></table></div>
+<div class="section-heading"><p class="eyebrow">GET STARTED</p><h2 tabindex="-1">接入前，先确认这几件事</h2><p class="section-intro">商户服务端创建与查询支付，买家打开接口返回的付款地址；凭据、金额与最终支付结果都由服务端管理。</p></div>
+<div class="cards"><div class="card"><h3>凭据与环境</h3><p>申请生产 ACQUIRING 类型的 AccessKeyId、SecretKey 与 MerchantCode，确认绑定的商户、MID、LIVE 环境及操作 scope。</p><span class="detail">一组凭据 · 一个 MID · 一个环境</span></div><div class="card"><h3>订单与金额</h3><p>所有金额使用 USD 整数美分。保存商户订单号、支付资源 ID 与每个业务动作的幂等键。</p><span class="detail">USD 10.00 → 1000</span></div><div class="card"><h3>通知与确认</h3><p>服务端签名查询原 Payment，核对订单、金额、币种与 CAPTURED 后履约。通知接入范围须另行与平台确认。</p><span class="detail">服务端核对原订单与支付结果</span></div></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="平台地址"><table><thead><tr><th>用途</th><th>地址 / 约定</th></tr></thead><tbody><tr><td>Open API</td><td><code>https://api.saferoute.global</code> · 前缀 <code>/open/v1/acquiring</code></td></tr><tr><td>商户门户</td><td><a href="https://pay.saferoute.global" target="_blank" rel="noopener noreferrer">pay.saferoute.global ↗</a></td></tr><tr><td>平台买家收银台</td><td><code>https://checkout.saferoute.global</code> · 仅用于接口返回的平台买家链接</td></tr><tr><td>生产环境 LIVE</td><td>由正式凭据绑定确定；请求不能改选商户、MID 或环境。域名本身不授予权限或受理能力。</td></tr></tbody></table></div>
 <p class="muted">本文资源 ID、订单和通知均为合成数据，用于说明格式；不代表已创建的可用订单。</p>
 </section>
 
 <section class="doc-section" id="quickstart" data-search>
 <div class="section-heading"><p class="eyebrow">INTEGRATION FLOW</p><h2 tabindex="-1">完成第一笔接入</h2><p class="section-intro">先确认生产凭据、商户开通、MID、渠道及可用支付方式，再连接商户服务端与买家页面。</p></div>
-<ol><li><strong>服务端创建收银台订单。</strong>持久化订单与 <code>Idempotency-Key</code>，签名调用 <code>POST /checkout-sessions</code>，使用 <code>amount / currency / clientOrderId</code>，保存返回的 <code>session.id</code>。</li><li><strong>买家打开平台收银台。</strong>使用 <code>https://checkout.saferoute.global/checkout/?sessionId=&lt;session.id&gt;</code>，仅交给本订单买家；API 凭据留在服务端。</li><li><strong>服务端确认结果。</strong>签名查询原 Session，读取其 <code>paymentIntentId</code> 后查询对应 Intent，或处理已验签的支付结果通知；核对原订单、金额、币种与兼容支付成功结果后履约。Session <code>complete</code> 不能单独确认收款，也不等于平台 Payment <code>CAPTURED</code>。</li></ol>
+<ol><li><strong>服务端创建 Payment。</strong>持久化订单与 <code>Idempotency-Key</code>，签名调用 <code>POST /payments</code>，使用 <code>amountMinor / currency / paymentMethod / merchantOrderId</code>，保存返回的 <code>paymentId</code>。本例使用已开通的 LIVE 凭据、<code>CARD</code> 和 <code>AUTOMATIC</code>。</li><li><strong>买家打开平台收银台。</strong>使用返回的 <code>checkoutUrl</code>；相对路径仅补全 <code>https://checkout.saferoute.global</code>，保留原路径、query 和 fragment。API 凭据留在服务端，不能从 Payment ID 构造付款链接。</li><li><strong>服务端确认结果。</strong>签名查询原 <code>GET /payments/{paymentId}</code>，仅当服务端确认 <code>CAPTURED</code> 且原订单、金额、币种一致后履约。</li></ol>
+<p><code>CARD</code> 是 Visa / Mastercard 共用的银行卡入口，须由平台单独启用；不提供单品牌限制。已有 VISA / MASTERCARD 开关不自动开通 CARD。LIVE 能力、MID 与 CARD 均须先由平台确认，环境由凭据绑定，不在请求正文中指定。</p>
 <div class="callout"><strong>浏览器返回只用于体验</strong>页面跳转、关窗或前端完成提示均不能确认收款。处理中、超时、未知结果应继续确认原支付，避免创建第二笔。</div>
-<h3>完整服务端示例</h3><p>保存为 <code>create-checkout-session.mjs</code>，使用 Node.js 18+，无需安装依赖。通过环境变量设置凭据、持久化的原幂等键和订单号；正文只序列化一次。运行示例会发送正式建单请求，仅在平台确认商户与渠道已开通后使用。示例本身不代表已完成线上付款验收。</p>
-<div class="code-panel"><div class="code-bar"><span>Node.js · create-checkout-session.mjs</span></div><pre tabindex="0" aria-label="Node.js 完整签名请求"><code id="signed-example" data-copy>import crypto from "node:crypto";
+<h3>完整服务端示例</h3><p>保存为 <code>create-payment.mjs</code>，使用 Node.js 18+，无需安装依赖。通过环境变量设置 LIVE 凭据、持久化的原幂等键和订单号；正文只序列化一次。运行示例会发送正式建单请求，仅在平台确认商户、MID 与 CARD 已开通后使用。示例本身不代表已完成线上付款验收。</p>
+<div class="code-panel"><div class="code-bar"><span>Node.js · create-payment.mjs</span></div><pre tabindex="0" aria-label="Node.js 完整签名请求"><code id="signed-example" data-copy>import crypto from "node:crypto";
 
 const origin = "https://api.saferoute.global";
 const checkoutOrigin = "https://checkout.saferoute.global";
@@ -108,10 +108,11 @@ export function signRequest({ method, path, queryEntries = [], rawBody = "",
 // 首次请求前保存这个正文；重试复用相同正文和原幂等键。
 // 仅在平台确认生产商户与渠道已开通后运行。
 const rawBody = JSON.stringify({
-  amount: 1000, currency: "usd", clientOrderId: VCC_MERCHANT_ORDER_ID
+  amountMinor: 1000, currency: "USD", captureMode: "AUTOMATIC",
+  paymentMethod: "CARD", merchantOrderId: VCC_MERCHANT_ORDER_ID
 });
 const { url, ...init } = signRequest({ method: "POST",
-  path: "/open/v1/acquiring/checkout-sessions", rawBody,
+  path: "/open/v1/acquiring/payments", rawBody,
   idempotencyKey: VCC_IDEMPOTENCY_KEY });
 const response = await fetch(url, { ...init, signal: AbortSignal.timeout(15000) });
 const result = await response.json();
@@ -119,18 +120,32 @@ if (!response.ok || result.code !== "0") {
   throw new Error("HTTP " + response.status + "; code=" + result.code +
     "; traceId=" + result.traceId);
 }
-const session = result.data;
-if (typeof session?.id !== "string" || !session.id) {
-  throw new Error("创建响应缺少 Session ID，请保留原订单并核查请求结果");
+const payment = result.data;
+if (typeof payment?.paymentId !== "string" || !/^acq_pay_[0-9a-f]{32}$/.test(payment.paymentId)) {
+  throw new Error("创建响应缺少有效 Payment ID，请保留原订单并核查请求结果");
 }
-const checkoutUrl = new URL("/checkout/", checkoutOrigin);
-checkoutUrl.searchParams.set("sessionId", session.id);
-const checkoutHref = checkoutUrl.href;
-// 持久化 session.id，将 checkoutHref 仅交给本订单买家。
-console.log({ sessionId: session.id, status: session.status });
+const rawCheckoutUrl = payment.checkoutUrl;
+if (typeof rawCheckoutUrl !== "string" || !rawCheckoutUrl || /[\\\u0000-\u0020\u007f]/.test(rawCheckoutUrl)) {
+  throw new Error("创建响应缺少付款链接，请保留原订单并核查请求结果");
+}
+const isRelative = rawCheckoutUrl.startsWith("/checkout/");
+if (!isRelative &amp;&amp; !/^https:\/\//i.test(rawCheckoutUrl)) {
+  throw new Error("付款链接格式不符，请保留原订单并联系平台核查");
+}
+const checkoutHref = isRelative ? checkoutOrigin + rawCheckoutUrl : rawCheckoutUrl;
+let buyerUrl;
+try { buyerUrl = new URL(checkoutHref); }
+catch { throw new Error("付款链接格式不符，请保留原订单并联系平台核查"); }
+if (buyerUrl.origin !== checkoutOrigin || buyerUrl.username || buyerUrl.password ||
+    buyerUrl.pathname !== "/checkout/" || !/^#acq_chk_[0-9a-f]{32}$/.test(buyerUrl.hash)) {
+  throw new Error("付款链接不属于平台买家页，请保留原订单并联系平台核查");
+}
+// 持久化 payment.paymentId，将 checkoutHref 仅交给本订单买家。
+// checkoutHref 保留接口原路径、query 和 fragment，不从 paymentId 生成。
+console.log({ paymentId: payment.paymentId, status: payment.status });
 // 超时不等于失败：用原订单/幂等键重试或签名查询，每次使用新 nonce。</code></pre></div>
-<h3>cURL 请求形状</h3><p><code>checkout-session.json</code> 内容为 <code>{"amount":1000,"currency":"usd","clientOrderId":"ORDER-20261017-001"}</code>；订单号使用已持久化的真实商户订单号。</p><p>下列头值由服务端按实际 body、路径与本次时间/nonce 生成。<code>checkout-session.json</code> 须与签名使用的文件字节完全一致；以 <code>--data-binary</code> 发送。</p>
-<div class="code-panel"><div class="code-bar"><span>cURL · 签名头由服务端生成</span></div><pre tabindex="0" aria-label="cURL 请求"><code data-copy>curl --request POST 'https://api.saferoute.global/open/v1/acquiring/checkout-sessions' \
+<h3>cURL 请求形状</h3><p><code>payment.json</code> 内容为 <code>{"amountMinor":1000,"currency":"USD","captureMode":"AUTOMATIC","paymentMethod":"CARD","merchantOrderId":"ORDER-20261017-001"}</code>；订单号使用已持久化的真实商户订单号。</p><p>下列头值由服务端按实际 body、路径与本次时间/nonce 生成。<code>payment.json</code> 须与签名使用的文件字节完全一致；以 <code>--data-binary</code> 发送。</p>
+<div class="code-panel"><div class="code-bar"><span>cURL · 签名头由服务端生成</span></div><pre tabindex="0" aria-label="cURL 请求"><code data-copy>curl --request POST 'https://api.saferoute.global/open/v1/acquiring/payments' \
   --header 'Content-Type: application/json' \
   --header "X-Access-Key-Id: $VCC_ACCESS_KEY_ID" \
   --header "X-Merchant-Code: $VCC_MERCHANT_CODE" \
@@ -138,7 +153,7 @@ console.log({ sessionId: session.id, status: session.status });
   --header "X-Vcc-Nonce: $VCC_NONCE" \
   --header "X-Vcc-Signature: $VCC_SIGNATURE" \
   --header "Idempotency-Key: $VCC_IDEMPOTENCY_KEY" \
-  --data-binary '@checkout-session.json'</code></pre></div>
+  --data-binary '@payment.json'</code></pre></div>
 </section>
 
 <section class="doc-section" id="auth" data-search>
@@ -150,7 +165,7 @@ console.log({ sessionId: session.id, status: session.status });
 <div class="code-panel"><div class="code-bar"><span>Canonical · 顺序固定</span></div><pre tabindex="0" aria-label="Canonical 六行格式"><code data-copy>timestamp_epoch_seconds
 nonce_original_value
 HTTP_METHOD_UPPERCASE
-/open/v1/acquiring/checkout-sessions
+/open/v1/acquiring/payments
 canonical_query_without_question_mark
 sha256_hex_of_exact_request_body_bytes</code></pre></div>
 <p><code>signature = hexLower(HMAC-SHA256(UTF8(SecretKey), UTF8(canonical)))</code>。Secret 是 UTF-8 文本 key，不做 hex 解码；输出使用 hex，不使用 Base64。</p>
@@ -161,7 +176,7 @@ sha256_hex_of_exact_request_body_bytes</code></pre></div>
 canonicalQuery:
 name=a%20b&amp;star=%2A&amp;unicode=%E6%B1%89%20%E5%AD%97&amp;z=one&amp;z=two</code></pre></div>
 <div class="callout warn"><strong>签名覆盖实际发送的原始 body</strong>签名后不得重新 stringify、改变空白或加末尾换行。空 body 与 <code>{}</code> 不同；空 body SHA-256 为 <code>e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>。完整函数见<a href="#quickstart">快速开始</a>。</div>
-<h3>Operation scope</h3><div class="table-wrap" tabindex="0" role="region" aria-label="操作权限"><table><thead><tr><th>Scope</th><th>覆盖操作</th></tr></thead><tbody><tr><td><code>payments:write</code></td><td>Session 创建与更新；仍需平台开通相应生产能力。</td></tr><tr><td><code>payments:read</code></td><td>Payment、Refund、Dispute、Payout 详情及兼容 Payment Intent 读取。</td></tr><tr><td><code>checkout:read</code></td><td>Session 列表与详情。</td></tr><tr><td><code>balance:read</code></td><td>余额查询。</td></tr></tbody></table></div>
+<h3>Operation scope</h3><div class="table-wrap" tabindex="0" role="region" aria-label="操作权限"><table><thead><tr><th>Scope</th><th>覆盖操作</th></tr></thead><tbody><tr><td><code>payments:write</code></td><td>Payment 创建；仍需平台开通相应生产能力。</td></tr><tr><td><code>payments:read</code></td><td>Payment、Refund、Dispute、Payout 查询。</td></tr><tr><td><code>balance:read</code></td><td>余额查询。</td></tr></tbody></table></div>
 </section>
 
 <section class="doc-section" id="common" data-search>
@@ -169,19 +184,20 @@ name=a%20b&amp;star=%2A&amp;unicode=%E6%B1%89%20%E5%AD%97&amp;z=one&amp;z=two</c
 <div class="example-grid"><div class="code-panel"><div class="code-bar"><span>成功信封</span></div><pre tabindex="0" aria-label="成功响应信封"><code data-copy>{
   "code": "0",
   "message": "OK",
-  "data": { "id": "example-session-id", "status": "open" },
+  "data": { "paymentId": "acq_pay_0123456789abcdef0123456789abcdef", "status": "CREATED" },
   "traceId": "example-trace-id"
 }</code></pre></div><div class="code-panel"><div class="code-bar"><span>错误信封 · null data 省略</span></div><pre tabindex="0" aria-label="错误响应信封"><code data-copy>{
   "code": "40904",
   "message": "幂等键与已处理请求不一致",
   "traceId": "example-trace-id"
 }</code></pre></div></div>
-<h3>金额、时间与空值</h3><p>USD 10.25 传整数 <code>1025</code>；兼容 Session / Intent 的 <code>amount</code> 同样为美分。业务时间使用 ISO 8601；API 签名时间为 Unix <b>秒</b>，Webhook 签名时间为 Unix <b>毫秒</b>。现代响应的可空属性可能省略，兼容 Map 响应可保留 <code>null</code>。</p>
+<h3>金额、时间与空值</h3><p>USD 10.25 传整数 <code>1025</code>。业务时间使用 ISO 8601；API 签名时间为 Unix <b>秒</b>，Webhook 签名时间为 Unix <b>毫秒</b>。响应的可空属性可能省略。</p>
 <h3>幂等与不确定结果</h3><p>同一业务动作保持原 <code>Idempotency-Key</code>、method/path/query/body；每次重试更新 timestamp、nonce 和 signature。同键异参或仍处理中可能返回 <code>409 / 40904</code>。超时或 5xx 先确认原资源或用原键重试，不换键再次建单。</p>
 <h3>分页结构</h3><p>把返回的 <code>nextCursor</code> 原样续传；为空表示无下一页。不同接口游标不互通，不解析或自行递增。</p>
-<div class="table-wrap" tabindex="0" role="region" aria-label="分页响应"><table><thead><tr><th>接口</th><th>limit 默认 / 范围</th><th>data 列表结构</th></tr></thead><tbody><tr><td>Payment</td><td>50 / 1–100</td><td><code>{payments: [...], nextCursor: null | "..."}</code></td></tr><tr><td>Refund</td><td>50 / 1–100</td><td><code>{refunds: [...], nextCursor: null | "..."}</code></td></tr><tr><td>Dispute</td><td>50 / 1–100</td><td><code>{disputes: [...], nextCursor: null | "..."}</code></td></tr><tr><td>兼容 Session / Intent</td><td>20 / 1–100（越界钳制）</td><td><code>{items: [...], nextCursor: null | "...", count: 0}</code></td></tr></tbody></table></div>
-<h3>接口目录</h3><p class="muted">以下路径相对 <code>/open/v1/acquiring</code>。本目录共 14 条路由；Session 创建与更新需要幂等键。</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="分页响应"><table><thead><tr><th>接口</th><th>limit 默认 / 范围</th><th>data 列表结构</th></tr></thead><tbody><tr><td>Payment</td><td>50 / 1–100</td><td><code>{payments: [...], nextCursor: null | "..."}</code></td></tr><tr><td>Refund</td><td>50 / 1–100</td><td><code>{refunds: [...], nextCursor: null | "..."}</code></td></tr><tr><td>Dispute</td><td>50 / 1–100</td><td><code>{disputes: [...], nextCursor: null | "..."}</code></td></tr></tbody></table></div>
+<h3>接口目录</h3><p class="muted">以下路径相对 <code>/open/v1/acquiring</code>。本目录共 9 条路由；Payment 创建需要幂等键。</p>
 <div class="table-wrap" tabindex="0" role="region" aria-label="完整收单接口目录"><table><thead><tr><th>方法 / 路径</th><th>Scope</th><th>用途 / 当前边界</th></tr></thead><tbody>
+<tr><td><span class="method post">POST</span><code>/payments</code></td><td><code>payments:write</code></td><td><a href="#payments">创建 Payment · 平台收银台</a></td></tr>
 <tr><td><span class="method get">GET</span><code>/payments</code></td><td><code>payments:read</code></td><td>支付列表</td></tr>
 <tr><td><span class="method get">GET</span><code>/payments/{paymentId}</code></td><td><code>payments:read</code></td><td>支付详情</td></tr>
 <tr><td><span class="method get">GET</span><code>/payments/{paymentId}/refunds</code></td><td><code>payments:read</code></td><td>退款列表</td></tr>
@@ -190,27 +206,34 @@ name=a%20b&amp;star=%2A&amp;unicode=%E6%B1%89%20%E5%AD%97&amp;z=one&amp;z=two</c
 <tr><td><span class="method get">GET</span><code>/disputes/{disputeId}</code></td><td><code>payments:read</code></td><td>争议详情</td></tr>
 <tr><td><span class="method get">GET</span><code>/balance</code></td><td><code>balance:read</code></td><td><a href="#balance">USD 余额</a></td></tr>
 <tr><td><span class="method get">GET</span><code>/payouts/{payoutId}</code></td><td><code>payments:read</code></td><td><a href="#payouts">历史提现详情</a></td></tr>
-<tr><td><span class="method post">POST</span><code>/checkout-sessions</code></td><td><code>payments:write</code></td><td><a href="#checkout">兼容 Session 创建</a></td></tr>
-<tr><td><span class="method get">GET</span><code>/checkout-sessions</code></td><td><code>checkout:read</code></td><td>兼容 Session 列表</td></tr>
-<tr><td><span class="method get">GET</span><code>/checkout-sessions/{id}</code></td><td><code>checkout:read</code></td><td>兼容 Session 详情</td></tr>
-<tr><td><span class="method patch">PATCH</span><code>/checkout-sessions/{id}</code></td><td><code>payments:write</code></td><td>兼容 Session 更新</td></tr>
-<tr><td><span class="method get">GET</span><code>/payment-intents</code></td><td><code>payments:read</code></td><td><a href="#intents">兼容 Intent 列表</a></td></tr>
-<tr><td><span class="method get">GET</span><code>/payment-intents/{id}</code></td><td><code>payments:read</code></td><td>兼容 Intent 详情</td></tr>
 </tbody></table></div>
 </section>
 
 <section class="doc-section" id="payments" data-search>
-<div class="section-heading"><p class="eyebrow">PAYMENTS</p><h2 tabindex="-1">支付 Payment</h2><p class="section-intro">查询已有平台 Payment 的金额、订单和最终状态。本节仅提供读取接口；Checkout Session 接入见收银台订单章节。</p></div>
+<div class="section-heading"><p class="eyebrow">PAYMENTS</p><h2 tabindex="-1">支付 Payment</h2><p class="section-intro">创建平台 Payment，使用返回地址进入平台收银台，再由商户服务端查询原支付确认收款。</p></div>
+<div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/payments</code><span class="scope">payments:write · Idempotency-Key</span></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Payment 创建请求"><table><thead><tr><th>字段</th><th>类型 / 必填</th><th>约束</th></tr></thead><tbody><tr><td><code>amountMinor</code></td><td>integer · 必填</td><td>正整数，美分。</td></tr><tr><td><code>currency</code></td><td>string · 必填</td><td><code>USD</code>。</td></tr><tr><td><code>paymentMethod</code></td><td>string · 必填</td><td>本流程使用单独开通的 <code>CARD</code>，Visa / Mastercard 共用入口；新建流程不支持显式 VISA / MASTERCARD 单品牌请求。钱包须另行确认资格与受理能力。</td></tr><tr><td><code>merchantOrderId</code></td><td>string · 必填</td><td>商户原订单号，≤128 字符。</td></tr><tr><td><code>captureMode</code></td><td>string · 可选</td><td>默认 <code>AUTOMATIC</code>；本收银台流程使用自动扣款。</td></tr><tr><td><code>regionCountry</code></td><td>string · 可选</td><td>两位国家码，默认 <code>US</code>，须符合已开通地区。</td></tr><tr><td><code>walletExternallyEligible</code></td><td>boolean · 可选</td><td>钱包外部资格声明，不替代平台受理授权；CARD 示例省略。</td></tr><tr><td><code>displayMetadata</code></td><td>object · 可选</td><td>最多16项非空字符串，key≤64、value≤256字符；不传凭据或敏感支付资料。</td></tr></tbody></table></div>
+<p>不接受未知字段。商户、MID、环境由凭据决定；平台须先确认 LIVE 与 CARD 开通。超时或处理中保留原订单、原正文和原幂等键，每次 HTTP 使用新 nonce。</p>
+<div class="code-panel"><div class="code-bar"><span>创建成功 data · 合成示例</span></div><pre tabindex="0" aria-label="Payment 创建响应"><code data-copy>{
+  "paymentId": "acq_pay_0123456789abcdef0123456789abcdef",
+  "status": "CREATED",
+  "amountMinor": 1000,
+  "currency": "USD",
+  "captureMode": "AUTOMATIC",
+  "paymentMethods": ["CARD"],
+  "checkoutUrl": "/checkout/#acq_chk_0123456789abcdef0123456789abcdef",
+  "merchantOrderId": "ORDER-20261017-001"
+}</code></pre></div>
 <div class="code-panel"><div class="code-bar"><span>详情 data · 形状示例</span></div><pre tabindex="0" aria-label="Payment 响应 data"><code data-copy>{
   "paymentId": "acq_pay_0123456789abcdef0123456789abcdef",
   "status": "CAPTURED",
   "amountMinor": 1000,
   "currency": "USD",
   "captureMode": "AUTOMATIC",
-  "paymentMethods": ["VISA"],
+  "paymentMethods": ["CARD"],
   "merchantOrderId": "ORDER-20261017-001"
 }</code></pre></div>
-<div class="table-wrap" tabindex="0" role="region" aria-label="支付响应字段"><table><thead><tr><th>data 字段</th><th>类型 / 含义</th></tr></thead><tbody><tr><td><code>paymentId</code></td><td>string；<code>acq_pay_</code> 加 32 位小写 hex。</td></tr><tr><td><code>attemptId</code></td><td>string，可省略；当前支付尝试 ID。</td></tr><tr><td><code>status</code></td><td>string；Payment 状态。</td></tr><tr><td><code>amountMinor / currency</code></td><td>integer / string；支付金额与币种。</td></tr><tr><td><code>captureMode / paymentMethods</code></td><td>string / string[]；扣款模式与支付方式数组。</td></tr><tr><td><code>commandStatus</code></td><td>string，可省略；命令状态，不能作为履约依据。</td></tr><tr><td><code>checkoutUrl</code></td><td>string，可省略；单笔收银台相对地址，仅在平台已提供时返回。</td></tr><tr><td><code>merchantOrderId</code></td><td>string；原订单号。该响应没有 createdAt / updatedAt。</td></tr></tbody></table></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="支付响应字段"><table><thead><tr><th>data 字段</th><th>类型 / 含义</th></tr></thead><tbody><tr><td><code>paymentId</code></td><td>string；<code>acq_pay_</code> 加 32 位小写 hex。</td></tr><tr><td><code>attemptId</code></td><td>string，可省略；当前支付尝试 ID。</td></tr><tr><td><code>status</code></td><td>string；Payment 状态。</td></tr><tr><td><code>amountMinor / currency</code></td><td>integer / string；支付金额与币种。</td></tr><tr><td><code>captureMode / paymentMethods</code></td><td>string / string[]；扣款模式与支付方式数组。</td></tr><tr><td><code>commandStatus</code></td><td>string，可省略；命令状态，不能作为履约依据。</td></tr><tr><td><code>checkoutUrl</code></td><td>string，可省略；保留接口返回的路径与令牌。平台买家页与签名只读解析接口的区别见“托管收银台”。</td></tr><tr><td><code>merchantOrderId</code></td><td>string；原订单号。该响应没有 createdAt / updatedAt。</td></tr></tbody></table></div>
 <div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payments/{paymentId}</code><span class="scope">payments:read</span></div><p>返回同一 Payment data 结构；核对原订单、金额、币种和最终状态。</p>
 <div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payments</code><span class="scope">payments:read</span></div>
 <div class="table-wrap" tabindex="0" role="region" aria-label="支付列表查询"><table><thead><tr><th>可选 Query</th><th>约束</th></tr></thead><tbody><tr><td><code>cursor</code></td><td>原样续传 nextCursor。</td></tr><tr><td><code>limit</code></td><td>默认 50，1–100。</td></tr><tr><td><code>status</code></td><td>Payment 状态精确筛选。</td></tr><tr><td><code>merchantOrderId</code></td><td>订单号精确筛选，≤128 字符。</td></tr></tbody></table></div>
@@ -219,15 +242,10 @@ name=a%20b&amp;star=%2A&amp;unicode=%E6%B1%89%20%E5%AD%97&amp;z=one&amp;z=two</c
 </section>
 
 <section class="doc-section" id="hosted" data-search>
-<div class="section-heading"><p class="eyebrow">HOSTED CHECKOUT</p><h2 tabindex="-1">托管收银台</h2><p class="section-intro">使用 Session ID 打开平台收银台。买家页面不接收 AccessKeyId、SecretKey 或商户 HMAC 签名材料。</p></div>
-<div class="code-panel"><div class="code-bar"><span>Checkout Session · 买家跳转</span></div><pre tabindex="0" aria-label="Session 收银台跳转"><code data-copy>const checkoutUrl = new URL(
-  "/checkout/", "https://checkout.saferoute.global"
-);
-checkoutUrl.searchParams.set("sessionId", session.id);
-const checkoutHref = checkoutUrl.href;
-// https://checkout.saferoute.global/checkout/?sessionId=&lt;id&gt;</code></pre></div>
-<p>仅将本订单的收银台地址交给对应买家。Session 响应的 <code>url</code> 由商户服务端保留；买家使用上方平台 Session 地址。</p>
-<div class="callout"><strong>分别确认订单与支付状态</strong>Session ID、Payment ID、Payment Intent ID 不能相互替代。页面完成提示不能作为履约依据；通过签名查询或已验签通知核对原订单、金额、币种与兼容支付结果。</div>
+<div class="section-heading"><p class="eyebrow">HOSTED CHECKOUT</p><h2 tabindex="-1">托管收银台</h2><p class="section-intro">按创建接口使用返回的付款地址。买家页面不接收 AccessKeyId、SecretKey 或商户 HMAC 签名材料。</p></div>
+<h3>Payment：LIVE 平台收银台</h3>
+<p>默认接入使用 <code>POST /payments</code>、已开通的 LIVE 凭据与独立 <code>CARD</code>，使用返回的 <code>checkoutUrl</code>。相对路径仅补全 <code>https://checkout.saferoute.global</code>，保留原路径、query 和 fragment。<code>/checkout/#acq_chk_…</code> 是平台买家页；<code>/open/v1/hosted-checkout/…</code> 是商户服务端签名只读解析接口，不能作为买家付款页面或改写成买家页。完整校验示例见<a href="#quickstart">快速开始</a>。</p>
+<p>买家获得付款链接后应及时打开。若页面暂无法初始化、超时或结果未知，请保留原支付并查询确认；不要自动另建订单。只有服务端查询原 Payment 确认 <code>CAPTURED</code> 且订单、金额、币种一致后才履约。</p>
 </section>
 
 <section class="doc-section" id="refunds" data-search>
@@ -281,53 +299,8 @@ const checkoutHref = checkoutUrl.href;
 }</code></pre></div></div><p>status：<code>CREATED / REVIEW_REQUIRED / READY / PROCESSING / SUCCEEDED / FAILED / CANCELED / RETURNED</code>。</p>
 </section>
 
-<section class="doc-section" id="checkout" data-search>
-<div class="section-heading"><p class="eyebrow">COMPATIBILITY API</p><h2 tabindex="-1">Checkout Session</h2><p class="section-intro">通过 Session 创建收银台订单，使用 amount、clientOrderId 与小写状态；字段和状态与平台 Payment 分别处理。生产受理须先由平台确认商户及渠道开通。</p></div>
-<div class="endpoint"><span class="method post">POST</span><code>/open/v1/acquiring/checkout-sessions</code><span class="scope">payments:write · Idempotency-Key</span></div>
-<div class="table-wrap" tabindex="0" role="region" aria-label="Session 请求"><table><thead><tr><th>字段</th><th>类型 / 必填</th><th>约束</th></tr></thead><tbody><tr><td><code>amount</code></td><td>integer · <span class="required">必填</span></td><td>1–99,999,999，美分。</td></tr><tr><td><code>currency</code></td><td>string · <span class="required">必填</span></td><td><code>usd</code>。</td></tr><tr><td><code>clientOrderId</code></td><td>string · 可选</td><td>去首尾空白后 ≤64 字符；空串视为无。</td></tr><tr><td><code>customMetadata</code></td><td>object · 可选</td><td>扁平标量值；禁止大小写无关的 vcc 前缀 key；含平台保留字段后序列化 ≤2048 UTF-8 字节。</td></tr><tr><td><code>config</code></td><td>object · 可选</td><td>只传平台确认支持的配置；示例省略。</td></tr><tr><td><code>expiresAt</code></td><td>ISO 8601 · 可选</td><td>距服务端当前时间至少 30 分钟、最多 7 天。示例省略以避免固定日期过期。</td></tr></tbody></table></div>
-<p>未知顶层字段拒绝；不使用 Payment 的 <code>amountMinor / merchantOrderId / paymentMethod</code>。</p>
-<div class="example-grid"><div class="code-panel"><div class="code-bar"><span>兼容创建请求</span></div><pre tabindex="0" aria-label="Session 请求示例"><code data-copy>{
-  "amount": 1000,
-  "currency": "usd",
-  "clientOrderId": "ORDER-20261017-001",
-  "customMetadata": { "item": "Example order" }
-}</code></pre></div><div class="code-panel"><div class="code-bar"><span>详情 data · 可空字段保留 null</span></div><pre tabindex="0" aria-label="Session 响应示例"><code data-copy>{
-  "id": "example-session-id",
-  "url": "https://example.invalid/server-only-handoff",
-  "status": "open",
-  "amount": 1000,
-  "currency": "usd",
-  "clientOrderId": "ORDER-20261017-001",
-  "merchantCode": "EXAMPLE_MERCHANT",
-  "createdAt": "2026-10-17T04:00:00Z",
-  "expiresAt": "2026-10-17T05:00:00Z",
-  "paymentIntentId": null,
-  "customMetadata": { "item": "Example order" },
-  "config": null
-}</code></pre></div></div>
-<p>基础响应字段为 <code>id / url / status / amount / currency / clientOrderId / merchantCode / createdAt / expiresAt / paymentIntentId</code>；详情可含 customMetadata / config，列表不含这两项详情字段。url 是服务端兼容字段；买家使用 <code>https://checkout.saferoute.global/checkout/?sessionId=&lt;id&gt;</code>。</p>
-<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/checkout-sessions</code><span class="scope">checkout:read</span></div><p>可选 query：<code>cursor</code> 原样续传；<code>limit</code> 默认 20、1–100（越界钳制）；<code>status</code>、<code>clientOrderId</code> 筛选。</p><div class="code-panel"><div class="code-bar"><span>列表成功 data</span></div><pre tabindex="0" aria-label="Session 列表响应"><code data-copy>{ "items": [], "nextCursor": null, "count": 0 }</code></pre></div>
-<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/checkout-sessions/{id}</code><span class="scope">checkout:read</span></div><p>返回上述详情；非终态查询可尝试刷新，无法刷新时可能附 <code>freshness: "CACHED", nonRealtime: true</code>。列表为快照，不承诺强实时。</p>
-<div class="endpoint"><span class="method patch">PATCH</span><code>/open/v1/acquiring/checkout-sessions/{id}</code><span class="scope">payments:write · Idempotency-Key</span></div><p>仅允许 amount 与 expiresAt，至少一项，约束与创建相同。仅 open 可更新，否则 <code>409 / 40916</code>；示例：<code>{"amount":1200}</code>。</p><div class="callout"><strong>Session 与 Intent 分别确认</strong>常见 Session 状态为 <code>open / complete / expired / canceled</code>；没有通用 failed Session 终态承诺。Session complete 不等于平台 Payment 的 CAPTURED。兼容接入结合服务端查询与已验签完成通知确认原订单，必要时读取返回的 paymentIntentId。</div>
-</section>
-
-<section class="doc-section" id="intents" data-search>
-<div class="section-heading"><p class="eyebrow">COMPATIBILITY API</p><h2 tabindex="-1">Payment Intent</h2><p class="section-intro">只读兼容接口。先取得 Session.paymentIntentId，再读取该 Intent。</p></div>
-<p>没有创建、确认或退款 Intent 的公开路由。不要将 Session ID 当作标准 Intent ID；尚未形成可读 Intent 时可能返回 404。</p>
-<div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payment-intents</code><span class="scope">payments:read</span></div><p>可选 query：<code>cursor</code> 原样续传；<code>limit</code> 默认 20、1–100（越界钳制）；<code>status</code>、<code>checkoutSessionId</code> 筛选。data 为 <code>{items: [Intent], nextCursor, count}</code>。</p><div class="endpoint"><span class="method get">GET</span><code>/open/v1/acquiring/payment-intents/{id}</code><span class="scope">payments:read</span></div>
-<div class="code-panel"><div class="code-bar"><span>详情 data · 形状示例</span></div><pre tabindex="0" aria-label="Intent 响应"><code data-copy>{
-  "id": "example-intent-id",
-  "status": "succeeded",
-  "amount": 1000,
-  "currency": "usd",
-  "checkoutSessionId": "example-session-id",
-  "clientOrderId": "ORDER-20261017-001",
-  "createdAt": "2026-10-17T04:00:00Z",
-  "updatedAt": "2026-10-17T04:01:00Z"
-}</code></pre></div><p>详情含上述八字段；降级快照可另有 <code>freshness: "CACHED", nonRealtime: true</code>。常见小写状态为 pending / processing / succeeded / failed / canceled，也可能保留其他渠道状态，不应假定列举穷尽。</p><div class="callout"><strong>确认兼容查询适用范围</strong>开通前与平台确认兼容查询在本商户及 MID 下的适用范围。履约前核对原 Session、商户订单号、金额与币种，不能仅凭返回的 ID 确认订单归属。</div>
-</section>
 <section class="doc-section" id="webhooks" data-search>
-<div class="section-heading"><p class="eyebrow">EVENT DELIVERY</p><h2 tabindex="-1">Webhook 通知</h2><p class="section-intro">配置 HTTPS 接收地址、订阅与独立 Webhook Secret。通知 Secret 与 API Secret 分别管理；端点按商户、MID 与环境配置。</p></div>
+<div class="section-heading"><p class="eyebrow">EVENT DELIVERY</p><h2 tabindex="-1">Webhook 通知</h2><p class="section-intro">通知接入范围须先由平台确认；配置 HTTPS 接收地址、订阅与独立 Webhook Secret。通知 Secret 与 API Secret 分别管理；端点按商户、MID 与环境配置。</p></div>
 <div class="table-wrap" tabindex="0" role="region" aria-label="通知请求头"><table><thead><tr><th>投递请求头</th><th>约定</th></tr></thead><tbody><tr><td><code>Content-Type</code></td><td><code>application/json; charset=utf-8</code></td></tr><tr><td><code>X-Vcc-Event-Id</code></td><td>稳定事件 ID，必须与 body.id 一致。</td></tr><tr><td><code>X-Vcc-Webhook-Key-Id</code></td><td>选择当前或轮换宽限期内密钥；旧密钥宽限默认 48 小时，以接入配置为准。</td></tr><tr><td><code>X-Vcc-Timestamp</code></td><td>Unix <b>毫秒</b>。</td></tr><tr><td><code>X-Vcc-Signature</code></td><td><code>t=&lt;timestampMillis&gt;,v1=&lt;64位小写hex&gt;</code>；t 须等于上方时间头。</td></tr></tbody></table></div>
 <h3>先验签，再解析</h3><p>签名消息为 <code>UTF8(timestampMillis + "\n") || exactRawBodyBytes</code>，使用通知 Secret 的 UTF-8 字节做 HMAC-SHA256 key。严格解析签名格式，检查时间窗并恒时比较。本契约不使用 nonce；验签前不得 JSON.parse 后重新 stringify。</p>
 <div class="code-panel"><div class="code-bar"><span>Node.js · 原始 Buffer 验签</span></div><pre tabindex="0" aria-label="Webhook 验签代码"><code id="webhook-example" data-copy>import crypto from "node:crypto";
@@ -351,33 +324,7 @@ export function verifyWebhook(rawBody, secret, timestamp, signature, now = Date.
 // 通过后再 JSON.parse，检查 id 与 X-Vcc-Event-Id 一致、version、type、
 // environment、MID 和订单归属；幂等持久化成功后快速返回 204。</code></pre></div>
 <h3>Schema v1 事件信封</h3><p>事件使用 <code>id / type / version / occurredAt / traceId / merchantId / midPublicId / environment / aggregateType / aggregateId / data</code>，不包在 API 的 code/data 信封内，字段不是 eventId / eventType。</p>
-<div class="code-panel"><div class="code-bar"><span>payment_intent.succeeded · 支付结果信封示例</span></div><pre tabindex="0" aria-label="Webhook 事件信封"><code data-copy>{
-  "id": "example-event-001",
-  "type": "merchant.webhook.acquiring.payment_intent.succeeded",
-  "version": 1,
-  "occurredAt": "2026-10-17T04:00:00Z",
-  "traceId": "example-trace-id",
-  "merchantId": 10001,
-  "midPublicId": "acq_mid_0123456789abcdef0123456789abcdef",
-  "environment": "LIVE",
-  "aggregateType": "payment_intent",
-  "aggregateId": "example-intent-id",
-  "data": {
-    "paymentIntentId": "example-intent-id",
-    "checkoutSessionId": "example-session-id",
-    "status": "succeeded",
-    "amount": 1000,
-    "currency": "usd",
-    "clientOrderId": "ORDER-20261017-001",
-    "updatedAt": "2026-10-17T04:00:00Z"
-  }
-}</code></pre></div>
-<div class="callout warn"><strong>履约前确认原订单与 Intent</strong>验签并核对归属后，签名查询原 Session，再使用其 <code>paymentIntentId</code> 查询对应 Intent；要求 Intent <code>status=succeeded</code>，并核对原商户订单号、Session / Intent 关联、金额与币种。仅收到 Session <code>complete</code> 或浏览器完成提示不足以确认收款。</div>
-<h3>事件类型与 data</h3><p class="muted">下表类型统一以 <code>merchant.webhook.acquiring.</code> 开头；按 type 与 version 解析，不为未知类型推断支付成功。</p>
-<div class="table-wrap" tabindex="0" role="region" aria-label="Webhook 事件类型"><table><thead><tr><th>类型后缀</th><th>data 字段</th></tr></thead><tbody>
-<tr><td><code>checkout_session.completed</code></td><td>checkoutSessionId、status=complete、amount、currency；可选 clientOrderId、paymentIntentId、customMetadata 与兼容事件参考字段</td></tr>
-<tr><td><code>payment_intent.succeeded</code><br><code>payment_intent.failed</code></td><td>paymentIntentId、checkoutSessionId、status、amount、currency；可选 clientOrderId、updatedAt</td></tr>
-</tbody></table></div>
+<div class="callout warn"><strong>履约前查询原 Payment</strong>签名查询原 <code>GET /payments/{paymentId}</code>，只有确认 <code>CAPTURED</code> 且原订单、金额、币种一致后才履约；未知通知类型或浏览器完成提示不能作为收款依据。</div>
 <h3>接收、去重与重投</h3><ol><li>验签并检查事件 ID、版本、环境、MID 与订单归属，以 <code>event.id</code> 幂等持久化。</li><li>持久化成功后快速返回任意 <b>2xx</b>（建议 <code>204</code> 空 body）；重复已接收事件仍返回 2xx，耗时履约异步执行。</li><li>容忍重复、延迟与非按序抵达。重投复用同一事件 ID / body，投递时间戳和签名可变化。</li></ol>
 <div class="table-wrap" tabindex="0" role="region" aria-label="通知投递结果"><table><thead><tr><th>接收结果</th><th>投递行为</th></tr></thead><tbody><tr><td>2xx</td><td>已确认接收。</td></tr><tr><td>408 / 429 / 5xx</td><td>可按退避重试；默认首投加 3 次重试，配置可变。</td></tr><tr><td>其他非 2xx HTTP</td><td>不自动重试，修复接收端后联系平台核查。</td></tr><tr><td>超时 / 网络结果未知</td><td>不盲目自动重复；查询原支付，必要时联系平台核查通知。</td></tr></tbody></table></div>
 </section>
@@ -385,15 +332,15 @@ export function verifyWebhook(rawBody, secret, timestamp, signature, now = Date.
 <section class="doc-section" id="errors" data-search>
 <div class="section-heading"><p class="eyebrow">ERROR HANDLING</p><h2 tabindex="-1">错误处理与重试</h2><p class="section-intro">保留 traceId、资源 ID、HTTP 状态和字符串业务码以便排查；不记录凭据、签名、checkout token 或完整敏感 body。</p></div>
 <div class="table-wrap" tabindex="0" role="region" aria-label="公共错误码"><table><thead><tr><th>HTTP</th><th>code</th><th>含义与处理</th></tr></thead><tbody>
-<tr><td>400</td><td><code>40001</code></td><td>参数或状态验证失败；修正参数或确认能力。</td></tr><tr><td>400</td><td><code>40003</code></td><td>缺少 Idempotency-Key；补原业务动作的键。</td></tr><tr><td>400</td><td><code>40012 / 40013</code></td><td>timestamp / nonce 格式错误；API 时间使用 Unix 秒。</td></tr><tr><td>400</td><td><code>40060</code></td><td>渠道拒绝请求；检查参数与可用能力。</td></tr><tr><td>401</td><td><code>40110</code></td><td>凭据无效；检查凭据状态与绑定信息。</td></tr><tr><td>401</td><td><code>40111</code></td><td>签名错误；核对原始 body、路径、query、Secret 和 LF。</td></tr><tr><td>401</td><td><code>40112</code></td><td>时钟偏差；同步时钟后重新签名。</td></tr><tr><td>401</td><td><code>40114</code></td><td>nonce 重复；换新 nonce，保留原业务幂等键。</td></tr><tr><td>403</td><td><code>40314 / 40315</code></td><td>凭据类型/scope 不符，或能力关闭/策略拒绝；确认授权与资格。</td></tr><tr><td>404</td><td><code>40401</code></td><td>资源不存在或不在当前可见范围；核对 ID 与集成流程。</td></tr><tr><td>409</td><td><code>40901</code></td><td>业务状态冲突；重新查询原资源。</td></tr><tr><td>409</td><td><code>40904</code></td><td>同键异参或仍处理中；核对原请求与原资源，不直接换键。</td></tr><tr><td>409</td><td><code>40916</code></td><td>Session 不可修改；查询最新状态。</td></tr><tr><td>429</td><td><code>42902</code></td><td>请求频繁；按响应等待后退避。</td></tr><tr><td>502 / 503</td><td><code>50260</code></td><td>渠道故障或操作不支持；先确认原订单及平台能力，再决定是否重试。</td></tr><tr><td>500 / 503</td><td><code>50001</code></td><td>服务暂不可用；确认原订单并保留原幂等键。</td></tr>
+<tr><td>400</td><td><code>40001</code></td><td>参数或状态验证失败；修正参数或确认能力。</td></tr><tr><td>400</td><td><code>40003</code></td><td>缺少 Idempotency-Key；补原业务动作的键。</td></tr><tr><td>400</td><td><code>40012 / 40013</code></td><td>timestamp / nonce 格式错误；API 时间使用 Unix 秒。</td></tr><tr><td>400</td><td><code>40060</code></td><td>渠道拒绝请求；检查参数与可用能力。</td></tr><tr><td>401</td><td><code>40110</code></td><td>凭据无效；检查凭据状态与绑定信息。</td></tr><tr><td>401</td><td><code>40111</code></td><td>签名错误；核对原始 body、路径、query、Secret 和 LF。</td></tr><tr><td>401</td><td><code>40112</code></td><td>时钟偏差；同步时钟后重新签名。</td></tr><tr><td>401</td><td><code>40114</code></td><td>nonce 重复；换新 nonce，保留原业务幂等键。</td></tr><tr><td>403</td><td><code>40314 / 40315</code></td><td>凭据类型/scope 不符，或能力关闭/策略拒绝；确认授权与资格。</td></tr><tr><td>404</td><td><code>40401</code></td><td>资源不存在或不在当前可见范围；核对 ID 与集成流程。</td></tr><tr><td>409</td><td><code>40901</code></td><td>业务状态冲突；重新查询原资源。</td></tr><tr><td>409</td><td><code>40904</code></td><td>同键异参或仍处理中；核对原请求与原资源，不直接换键。</td></tr><tr><td>429</td><td><code>42902</code></td><td>请求频繁；按响应等待后退避。</td></tr><tr><td>502 / 503</td><td><code>50260</code></td><td>渠道故障或操作不支持；先确认原订单及平台能力，再决定是否重试。</td></tr><tr><td>500 / 503</td><td><code>50001</code></td><td>服务暂不可用；确认原订单并保留原幂等键。</td></tr>
 </tbody></table></div><p>只对可恢复错误做有上限的指数退避并加抖动。确定的参数、权限、未开放能力或同键异参错误先修正原因；未知支付结果先查询。HTTP 状态与业务码不是同一值，例如业务码 50260 可对应 HTTP 503。</p>
 </section>
 
 <section class="doc-section" id="checklist" data-search>
 <div class="section-heading"><p class="eyebrow">READY TO INTEGRATE</p><h2 tabindex="-1">接入检查清单</h2><p class="section-intro">生产接入前确认商户与渠道开通、签名规则、订单状态及异常处理。</p></div>
-<ul class="checklist"><li>凭据类型、商户、MID、环境与操作 scope 已确认。</li><li>商户生产开通、渠道与可用支付方式已确认。</li><li>签名覆盖重复 query、空格、中文、空 body 与 JSON。</li><li>每次 HTTP 新 nonce；重试保持原键与原正文。</li><li>金额使用整数美分，订单与资源 ID 已保存。</li><li>以 Session ID 构建平台收银台地址，仅交给对应买家。</li><li>履约前查询原 Session / Intent 或验签通知，核对订单、金额、币种与支付结果；不单凭 Session complete。</li><li>超时、5xx、409 处理中均确认原交易，避免重复支付。</li><li>Webhook 原始 Buffer 验签，检查 ID、版本与归属。</li><li>持久化去重，重复事件返回 2xx，并容忍乱序。</li><li>日志不含凭据、签名、checkout token 或敏感 body。</li><li>生产 LIVE 凭据与受理范围已确认，线上验收由平台另行完成。</li></ul>
+<ul class="checklist"><li>凭据类型、商户、MID、环境与操作 scope 已确认。</li><li>商户生产开通、渠道与可用支付方式已确认。</li><li>签名覆盖重复 query、空格、中文、空 body 与 JSON。</li><li>每次 HTTP 新 nonce；重试保持原键与原正文。</li><li>金额使用整数美分，订单与资源 ID 已保存。</li><li>默认 Payment / CARD / LIVE，保留 checkoutUrl 原路径与 fragment。</li><li>平台 Payment 履约前服务端确认 CAPTURED 与原订单、金额、币种。</li><li>超时、5xx、409 处理中均确认原交易，避免重复支付。</li><li>Webhook 原始 Buffer 验签，检查 ID、版本与归属。</li><li>持久化去重，重复事件返回 2xx，并容忍乱序。</li><li>日志不含凭据、签名、checkout token 或敏感 body。</li><li>生产 LIVE 凭据与受理范围已确认，线上验收由平台另行完成。</li></ul>
 </section>
-<footer class="footer"><span>VCC 收单开放平台 · Open API v1 · 更新于 2026-10-17</span><a href="#hero">返回顶部 ↑</a></footer>
+<footer class="footer"><span>VCC 收单开放平台 · Open API v1 · 更新于 2026-10-18</span><a href="#hero">返回顶部 ↑</a></footer>
 </main>
 </div>
 <p class="copy-status" id="copyStatus" role="status" aria-live="polite" aria-atomic="true"></p>
